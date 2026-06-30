@@ -21,11 +21,13 @@ trap cleanup EXIT
 run_local_installer() {
     local root="$1"
     [[ -f "$root/scripts/install-local.sh" ]] || die "scripts/install-local.sh tidak dijumpai."
+    [[ -f "$root/scripts/install-v2.sh" ]] || die "scripts/install-v2.sh tidak dijumpai."
     [[ -d "$root/files" ]] || die "Folder files tidak dijumpai dalam pakej tema."
+
     bash "$root/scripts/install-local.sh"
+    bash "$root/scripts/install-v2.sh"
 }
 
-# Apabila repo telah di-clone atau ZIP GitHub telah diekstrak.
 if [[ -n "$SELF_DIR" && -f "$SELF_DIR/scripts/install-local.sh" && -d "$SELF_DIR/files" ]]; then
     run_local_installer "$SELF_DIR"
     exit $?
