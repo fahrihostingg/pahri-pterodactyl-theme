@@ -30,7 +30,12 @@ class AppearanceController extends Controller
         $validated = $request->validate([
             'accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'accent_secondary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'surface_opacity' => ['required', 'integer', 'between:55,95'],
+            'blur' => ['required', 'integer', 'between:8,40'],
+            'radius' => ['required', 'integer', 'between:12,34'],
+            'motion' => ['required', 'integer', 'between:50,180'],
             'animation' => ['nullable', 'boolean'],
+            'particles' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'file', 'mimetypes:image/png,image/jpeg,image/webp', 'max:4096'],
             'wallpaper' => ['nullable', 'file', 'mimetypes:image/png,image/jpeg,image/webp', 'max:12288'],
         ]);
@@ -38,7 +43,12 @@ class AppearanceController extends Controller
         $settings = array_merge($this->defaults(), $this->readSettings(), [
             'accent' => strtolower($validated['accent']),
             'accent_secondary' => strtolower($validated['accent_secondary']),
+            'surface_opacity' => (int) $validated['surface_opacity'],
+            'blur' => (int) $validated['blur'],
+            'radius' => (int) $validated['radius'],
+            'motion' => (int) $validated['motion'],
             'animation' => $request->boolean('animation'),
+            'particles' => $request->boolean('particles'),
         ]);
 
         File::ensureDirectoryExists($this->themePath('uploads'), 0755, true);
@@ -54,7 +64,7 @@ class AppearanceController extends Controller
         $this->writeSettings($settings);
         $this->writeCustomCss($settings);
 
-        $this->alert->success('Pahri Theme berjaya dikemas kini. Logo dan wallpaper baharu telah digunakan.')->flash();
+        $this->alert->success('Pahri Aurelia berjaya dikemas kini. Semua tetapan visual telah digunakan.')->flash();
 
         return redirect()->route('admin.settings.appearance');
     }
@@ -63,8 +73,13 @@ class AppearanceController extends Controller
     {
         return [
             'accent' => '#8b5cf6',
-            'accent_secondary' => '#06b6d4',
+            'accent_secondary' => '#22d3ee',
+            'surface_opacity' => 78,
+            'blur' => 24,
+            'radius' => 24,
+            'motion' => 100,
             'animation' => true,
+            'particles' => true,
             'logo' => '/themes/pahri/default-logo.svg',
             'wallpaper' => '/themes/pahri/default-wallpaper.svg',
         ];
@@ -104,6 +119,12 @@ class AppearanceController extends Controller
         $logo = $this->cssUrl($settings['logo']);
         $wallpaper = $this->cssUrl($settings['wallpaper']);
         $playState = $settings['animation'] ? 'running' : 'paused';
+        $particleDisplay = $settings['particles'] ? 'block' : 'none';
+        $opacity = number_format(((int) $settings['surface_opacity']) / 100, 2, '.', '');
+        $blur = (int) $settings['blur'];
+        $radius = (int) $settings['radius'];
+        $motion = max(50, min(180, (int) $settings['motion']));
+        $motionDuration = number_format(max(8, min(30, 18 / ($motion / 100))), 2, '.', '');
 
         $css = <<<CSS
 :root {
@@ -112,6 +133,11 @@ class AppearanceController extends Controller
     --pahri-logo: url("{$logo}");
     --pahri-wallpaper: url("{$wallpaper}");
     --pahri-animation-state: {$playState};
+    --pahri-particles-display: {$particleDisplay};
+    --pahri-glass-opacity: {$opacity};
+    --pahri-blur: {$blur}px;
+    --pahri-radius: {$radius}px;
+    --pahri-motion-duration: {$motionDuration}s;
 }
 CSS;
 
