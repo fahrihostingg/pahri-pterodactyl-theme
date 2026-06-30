@@ -43,13 +43,12 @@ def main() -> None:
     wrapper_text = wrapper.read_text(encoding='utf-8')
     admin_text = admin.read_text(encoding='utf-8')
 
-    # Migrate older Pahri runtime references without duplicating assets.
     wrapper_text = wrapper_text.replace('/themes/pahri/brand.js', '/themes/pahri/thema-new.js')
     admin_text = admin_text.replace('/themes/pahri/brand.js', '/themes/pahri/thema-new.js')
     wrapper_text = wrapper_text.replace('<title>Pahri Panel</title>', '<title>Pahri Thema New</title>')
     wrapper_text = wrapper_text.replace('<title>Pahri Aurelia</title>', '<title>Pahri Thema New</title>')
-    admin_text = admin_text.replace('<title>Pahri Panel - @yield(\'title\')</title>', '<title>Pahri Thema New - @yield(\'title\')</title>')
-    admin_text = admin_text.replace('<title>Pahri Aurelia - @yield(\'title\')</title>', '<title>Pahri Thema New - @yield(\'title\')</title>')
+    admin_text = admin_text.replace("<title>Pahri Panel - @yield('title')</title>", "<title>Pahri Thema New - @yield('title')</title>")
+    admin_text = admin_text.replace("<title>Pahri Aurelia - @yield('title')</title>", "<title>Pahri Thema New - @yield('title')</title>")
     admin_text = admin_text.replace('<span class="pahri-admin-logo-text">Pahri Panel</span>', '<span class="pahri-admin-logo-text">Pahri Thema New</span>')
     admin_text = admin_text.replace('<span class="pahri-admin-logo-text">Pahri Aurelia</span>', '<span class="pahri-admin-logo-text">Pahri Thema New</span>')
     admin_text = admin_text.replace('Pahri Panel &copy;', 'Pahri Thema New &copy;')
@@ -74,6 +73,7 @@ def main() -> None:
             "        <title>{{ config('app.name', 'Pterodactyl') }}</title>",
             '        <title>Pahri Panel</title>',
             '        <title>Pahri Aurelia</title>',
+            '        <title>Pahri Thema New</title>',
         ],
         "        <title>Pahri Thema New</title><!-- PAHRI THEMA NEW CLIENT TITLE -->",
         'PAHRI THEMA NEW CLIENT TITLE',
@@ -96,6 +96,7 @@ def main() -> None:
             "        <title>{{ config('app.name', 'Pterodactyl') }} - @yield('title')</title>",
             "        <title>Pahri Panel - @yield('title')</title>",
             "        <title>Pahri Aurelia - @yield('title')</title>",
+            "        <title>Pahri Thema New - @yield('title')</title>",
         ],
         "        <title>Pahri Thema New - @yield('title')</title><!-- PAHRI THEMA NEW ADMIN TITLE -->",
         'PAHRI THEMA NEW ADMIN TITLE',
@@ -108,6 +109,7 @@ def main() -> None:
             "                    <span class=\"pahri-admin-logo-text\">{{ config('app.name', 'Pterodactyl') }}</span>",
             '                    <span class="pahri-admin-logo-text">Pahri Panel</span>',
             '                    <span class="pahri-admin-logo-text">Pahri Aurelia</span>',
+            '                    <span class="pahri-admin-logo-text">Pahri Thema New</span>',
         ],
         '                    <span class="pahri-admin-logo-text">Pahri Thema New</span><!-- PAHRI THEMA NEW BRAND -->',
         'PAHRI THEMA NEW BRAND',
@@ -122,6 +124,8 @@ def main() -> None:
             old_footer,
             '<span class="pahri-footer-brand">Pahri Panel &copy; {{ date(\'Y\') }} &mdash; Built by Pahri</span>',
             '<span class="pahri-footer-brand">Pahri Aurelia &copy; {{ date(\'Y\') }} &mdash; Built by Pahri</span>',
+            '<span class="pahri-footer-brand">Pahri Thema New &copy; {{ date(\'Y\') }} &mdash; Built by Pahri</span>',
+            '<span class="pahri-footer-brand">Pahri Thema New &copy; {{ date(\'Y\') }} &mdash; Nexus Engine by Pahri</span>',
         ],
         new_footer,
         'PAHRI THEMA NEW FOOTER',
