@@ -1,12 +1,12 @@
 :root {
-    --pahri-accent: #8b5cf6;
+    --pahri-accent: #a855f7;
     --pahri-accent-secondary: #22d3ee;
     --pahri-logo: url("/themes/pahri/default-logo.svg");
     --pahri-wallpaper: url("/themes/pahri/default-wallpaper.svg");
     --pahri-animation-state: running;
     --pahri-particles-display: block;
     --pahri-glass-opacity: .78;
-    --pahri-blur: 24px;
+    --pahri-blur: 26px;
     --pahri-radius: 24px;
     --pahri-motion-duration: 18s;
 }
