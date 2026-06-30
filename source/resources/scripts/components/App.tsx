@@ -13,6 +13,7 @@ import AuthenticatedRoute from '@/components/elements/AuthenticatedRoute';
 import { ServerContext } from '@/state/server';
 import '@/assets/tailwind.css';
 import Spinner from '@/components/elements/Spinner';
+import PahriBroadcast from '@/components/PahriBroadcast';
 import styled, { keyframes } from 'styled-components/macro';
 
 const DashboardRouter = lazy(() => import(/* webpackChunkName: "dashboard" */ '@/routers/DashboardRouter'));
@@ -268,6 +269,7 @@ const App = () => {
                     </Router>
                 </Application>
             </StoreProvider>
+            <PahriBroadcast authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)} />
         </>
     );
 };
