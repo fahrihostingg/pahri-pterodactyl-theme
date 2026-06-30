@@ -1,7 +1,7 @@
 (() => {
     'use strict';
 
-    const BRAND = 'Pahri Panel';
+    const BRAND = 'Pahri Aurelia';
 
     function removeOriginalBrand() {
         document.querySelectorAll('[alt*="Pterodactyl"], [title*="Pterodactyl"], [aria-label*="Pterodactyl"]').forEach(element => {
@@ -17,7 +17,7 @@
     }
 
     function applyBrand() {
-        if (!document.title.includes('Pahri')) document.title = BRAND + ' — Control Center';
+        if (!document.title.includes('Pahri')) document.title = BRAND + ' — Spatial Control';
         const adminName = document.querySelector('.pahri-admin-logo-text');
         if (adminName) adminName.textContent = BRAND;
         removeOriginalBrand();
