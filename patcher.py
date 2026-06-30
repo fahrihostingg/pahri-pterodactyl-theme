@@ -19,7 +19,7 @@ def atomic_write(path: Path, content: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Patch Pterodactyl v1.14.x for Pahri Elegant Theme")
+    parser = argparse.ArgumentParser(description="Patch Pterodactyl v1.14.x for Pahri Thema New")
     parser.add_argument("--panel", required=True, help="Pterodactyl panel directory")
     args = parser.parse_args()
 
@@ -36,7 +36,16 @@ def main() -> None:
         if not path.is_file():
             fail(f"Fail sasaran tidak dijumpai ({label}): {path}")
 
-    source = {label: path.read_text(encoding="utf-8") for label, path in files.items()}
+    original = {label: path.read_text(encoding="utf-8") for label, path in files.items()}
+    source = dict(original)
+
+    # Migrate visible labels from older Pahri releases.
+    source["settings_nav"] = source["settings_nav"].replace("> Pahri Theme</a>", "> Pahri Thema New</a>")
+    source["settings_nav"] = source["settings_nav"].replace("> Pahri Aurelia</a>", "> Pahri Thema New</a>")
+    source["admin_layout"] = source["admin_layout"].replace("<span>Pahri Theme</span>", "<span>Pahri Thema New</span>")
+    source["admin_layout"] = source["admin_layout"].replace("<span>Pahri Aurelia</span>", "<span>Pahri Thema New</span>")
+    source["wrapper"] = source["wrapper"].replace('aria-label="Pahri Panel"', 'aria-label="Pahri Thema New"')
+    source["wrapper"] = source["wrapper"].replace('aria-label="Pahri Aurelia"', 'aria-label="Pahri Thema New"')
 
     transforms: dict[str, list[tuple[str, str, str]]] = {
         "routes": [
@@ -57,7 +66,7 @@ def main() -> None:
             (
                 "                    <li @if($activeTab === 'advanced')class=\"active\"@endif><a href=\"{{ route('admin.settings.advanced') }}\">Advanced</a></li>",
                 "                    <li @if($activeTab === 'advanced')class=\"active\"@endif><a href=\"{{ route('admin.settings.advanced') }}\">Advanced</a></li>\n"
-                "                    <li @if($activeTab === 'appearance')class=\"active\"@endif><a href=\"{{ route('admin.settings.appearance') }}\"><i class=\"fa fa-paint-brush\"></i> Pahri Theme</a></li>",
+                "                    <li @if($activeTab === 'appearance')class=\"active\"@endif><a href=\"{{ route('admin.settings.appearance') }}\"><i class=\"fa fa-diamond\"></i> Pahri Thema New</a></li>",
                 "$activeTab === 'appearance'",
             ),
         ],
@@ -76,7 +85,7 @@ def main() -> None:
                 "            <span class=\"pahri-orb pahri-orb-one\"></span>\n"
                 "            <span class=\"pahri-orb pahri-orb-two\"></span>\n"
                 "        </div>\n"
-                "        <a class=\"pahri-floating-logo\" href=\"{{ route('index') }}\" aria-label=\"Pahri Panel\"></a>\n"
+                "        <a class=\"pahri-floating-logo\" href=\"{{ route('index') }}\" aria-label=\"Pahri Thema New\"></a>\n"
                 "        <div class=\"pahri-watermark\" aria-hidden=\"true\">by Pahri</div>",
                 "pahri-client-theme",
             ),
@@ -113,10 +122,10 @@ def main() -> None:
                 "                        </li>\n"
                 "                        <li class=\"{{ Route::currentRouteName() !== 'admin.settings.appearance' ?: 'active' }}\">\n"
                 "                            <a href=\"{{ route('admin.settings.appearance') }}\">\n"
-                "                                <i class=\"fa fa-paint-brush\"></i> <span>Pahri Theme</span>\n"
+                "                                <i class=\"fa fa-diamond\"></i> <span>Pahri Thema New</span>\n"
                 "                            </a>\n"
                 "                        </li>",
-                "<span>Pahri Theme</span>",
+                "admin.settings.appearance') }}",
             ),
             (
                 "        <div class=\"wrapper\">",
@@ -132,7 +141,6 @@ def main() -> None:
         ],
     }
 
-    # Preflight every required anchor before writing anything.
     for label, items in transforms.items():
         text = source[label]
         for old, _new, installed_marker in items:
@@ -145,7 +153,6 @@ def main() -> None:
                 )
 
     output = dict(source)
-    changed = False
 
     for label, items in transforms.items():
         text = output[label]
@@ -153,19 +160,20 @@ def main() -> None:
             if installed_marker in text:
                 continue
             text = text.replace(old, new, 1)
-            changed = True
         output[label] = text
 
-    if not changed:
-        print("[OK] Pahri Theme sudah dipatch. Tiada perubahan diperlukan.")
-        return
-
+    changed = False
     for label, content in output.items():
-        if content != source[label]:
+        if content != original[label]:
             atomic_write(files[label], content)
             print(f"[PATCH] {files[label]}")
+            changed = True
 
-    print("[OK] Semua patch Pahri Theme berjaya digunakan.")
+    if not changed:
+        print("[OK] Pahri Thema New sudah dipatch. Tiada perubahan diperlukan.")
+        return
+
+    print("[OK] Semua patch Pahri Thema New berjaya digunakan.")
 
 
 if __name__ == "__main__":
