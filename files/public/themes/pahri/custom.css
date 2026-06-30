@@ -1,0 +1,7 @@
+:root {
+    --pahri-accent: #8b5cf6;
+    --pahri-accent-secondary: #06b6d4;
+    --pahri-logo: url("/themes/pahri/default-logo.svg");
+    --pahri-wallpaper: url("/themes/pahri/default-wallpaper.svg");
+    --pahri-animation-state: running;
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pahri logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="s" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#020617" flood-opacity=".5"/>
+    </filter>
+  </defs>
+  <rect x="42" y="42" width="428" height="428" rx="128" fill="url(#g)" filter="url(#s)"/>
+  <path d="M153 360V151h119c72 0 116 35 116 96 0 63-46 101-121 101h-46v12h-68zm68-70h48c33 0 51-14 51-41 0-25-18-38-51-38h-48v79z" fill="#fff"/>
+</svg>
