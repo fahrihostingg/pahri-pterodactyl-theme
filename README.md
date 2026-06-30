@@ -1,21 +1,41 @@
-# Pahri Luxury 3D Theme
+# Pahri Aurelia 4.0
 
-Tema source-level untuk **Pterodactyl Panel v1.14.x**. Versi 3.0.0 mengganti UI asal pada login, dashboard, navigation, server cards, page shell, server tabs dan admin panel dengan reka bentuk mewah, glassmorphism dan animasi 3D.
+Tema source-level premium untuk **Pterodactyl Panel v1.14.x**. Aurelia menggantikan paparan asal pada login, dashboard, navigation, server cards, page shell, server tabs dan admin panel dengan UI spatial, glassmorphism, aurora dan animasi 3D.
 
-## Apa yang berubah
+## Ciri Aurelia 4.0
 
-- Login split-layout premium dengan scene 3D bergerak.
-- Navbar client Pahri yang dibina terus dalam React.
-- Dashboard luxury dengan hero 3D dan live server collection.
-- Kad server baharu dengan status, CPU, RAM, disk dan allocation.
-- Semua halaman server menggunakan workspace dan sub-navigation Pahri.
-- Admin panel diubah kepada header, sidebar, card, table dan control gaya mewah.
-- Branding dan footer asal pada paparan diganti dengan Pahri Panel.
-- Logo, wallpaper, warna dan animasi masih boleh diedit melalui admin.
-- Backup Blade, controller, aset dan source React dibuat sebelum pemasangan.
-- Installer membina frontend production menggunakan Node.js 22 atau 24.
-- Auto-restore source sebelumnya jika production build gagal.
-- Uninstall memulihkan source asal dan membina semula frontend asal.
+- Login cinematic split-layout dengan orbital rings dan objek 3D.
+- Aurora berlapis, cursor light, volumetric grid, grain dan star particles.
+- Navbar adaptive gaya operating system.
+- Command Palette melalui `Ctrl + K` untuk navigasi dan quick actions.
+- Dashboard executive control room dengan live clock, timezone, role, security dan total instance.
+- Interactive holographic server cards yang condong mengikut cursor.
+- Live CPU, RAM, disk, allocation dan resource progress bars.
+- Semua console, files, database, backup, network dan settings menggunakan Aurelia workspace.
+- Admin panel menggunakan Aurelia header, sidebar, tables, cards, controls dan modals.
+- Branding asal pada paparan diganti dengan Pahri Aurelia.
+- Responsive untuk desktop, tablet dan telefon.
+- Tidak menggunakan library WebGL atau 3D berat.
+
+## Aurelia Visual Engine
+
+Buka:
+
+```text
+Admin Panel → Settings → Pahri Theme
+```
+
+Admin boleh mengubah:
+
+- Logo panel.
+- Wallpaper cinematic.
+- Warna aurora utama dan kedua.
+- Glass opacity.
+- Glass blur.
+- Corner radius seluruh UI.
+- Motion intensity.
+- Animasi aurora dan 3D.
+- Star particles dan ambient dust.
 
 ## Keperluan
 
@@ -23,11 +43,12 @@ Tema source-level untuk **Pterodactyl Panel v1.14.x**. Versi 3.0.0 mengganti UI 
 - Struktur yang diuji: v1.14.1.
 - PHP 8.2 atau lebih baharu.
 - Python 3.
-- Node.js 22 atau 24.
-- Yarn Classic. Installer cuba menyediakannya melalui Corepack jika belum tersedia.
+- Ubuntu atau Debian untuk auto-install Node.js.
 - Sekurang-kurangnya 4 GB RAM disyorkan untuk production build.
 
-## Install daripada GitHub
+Installer akan memasang Node.js 24 dan Yarn Classic secara automatik apabila belum tersedia.
+
+## Install atau update
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | sudo bash
@@ -48,11 +69,11 @@ curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-the
 
 Installer menjalankan tiga peringkat:
 
-1. Memasang editor logo, wallpaper dan warna.
+1. Memasang Aurelia Visual Engine dan editor admin.
 2. Memasang full reskin untuk admin dan Blade shell.
 3. Mengganti komponen React dan menjalankan `yarn build:production`.
 
-Output berjaya akan mengandungi:
+Output berjaya:
 
 ```text
 [OK] Pahri Elegant Theme berjaya dipasang.
@@ -60,35 +81,22 @@ Output berjaya akan mengandungi:
 [OK] Pahri Luxury 3D source theme berjaya dibina dan diaktifkan.
 ```
 
-## Editor tema
+Arahan install yang sama berfungsi sebagai update. Backup source asal tidak ditimpa.
 
-```text
-Admin Panel → Settings → Pahri Theme
-```
-
-URL:
-
-```text
-https://domain-panel.com/admin/settings/appearance
-```
-
-Admin boleh menukar:
-
-- Logo panel.
-- Wallpaper.
-- Warna utama.
-- Warna kedua.
-- Animasi ambient.
-
-## Update
-
-Jalankan semula arahan install:
+## Selepas update
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | sudo bash
+cd /var/www/pterodactyl
+php artisan optimize:clear
 ```
 
-Backup source asal tidak ditimpa semasa update.
+Kemudian lakukan hard refresh:
+
+```text
+Ctrl + Shift + R
+```
+
+Jika menggunakan Cloudflare Proxy, purge cache domain panel selepas production build selesai.
 
 ## Uninstall dan rollback penuh
 
@@ -118,21 +126,13 @@ Backup source React asal:
 /var/www/pterodactyl/.pahri-source-backups/
 ```
 
-## Jika paparan lama masih dicache
+## Keserasian dan keselamatan
 
-```bash
-cd /var/www/pterodactyl
-php artisan optimize:clear
-```
-
-Kemudian lakukan hard refresh pada browser:
-
-```text
-Ctrl + Shift + R
-```
-
-Jika menggunakan Cloudflare Proxy, purge cache domain panel selepas production build selesai.
+- TypeScript diperiksa terhadap source rasmi Pterodactyl v1.14.1.
+- Frontend production dibina dengan Node.js 24.
+- Tiada password, API key atau data pengguna disimpan oleh tema.
+- Installer membuat backup dan memulihkan source sebelumnya jika build gagal.
 
 ## Nota sebelum update Pterodactyl
 
-Uninstall tema terlebih dahulu, update Pterodactyl, kemudian pasang versi tema yang telah disahkan serasi dengan versi panel baharu.
+Uninstall tema terlebih dahulu, update Pterodactyl, kemudian pasang versi Aurelia yang telah disahkan serasi dengan versi panel baharu.
