@@ -7,7 +7,7 @@ PACKAGE_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 ASSET_DIR="$PACKAGE_DIR/files/public/themes/pahri"
 TARGET_DIR="$PANEL_DIR/public/themes/pahri"
 
-log() { printf '\033[1;35m[PAHRI NOVA]\033[0m %s\n' "$*"; }
+log() { printf '\033[1;35m[PAHRI THEMA NEW]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 
 [[ $EUID -eq 0 ]] || die "Jalankan sebagai root."
@@ -16,6 +16,7 @@ command -v python3 >/dev/null 2>&1 || die "Python 3 diperlukan."
 
 ASSETS=(
     brand.js
+    thema-new.js
     nova-client-shell.css
     nova-client-surfaces.css
     nova-client-controls.css
@@ -31,7 +32,7 @@ for asset in "${ASSETS[@]}"; do
 done
 [[ -f "$PACKAGE_DIR/patcher-v2.py" ]] || die "patcher-v2.py tiada."
 
-log "Memasang modul full reskin..."
+log "Memasang modul Nexus full reskin..."
 mkdir -p "$TARGET_DIR"
 for asset in "${ASSETS[@]}"; do
     install -m 0644 "$ASSET_DIR/$asset" "$TARGET_DIR/$asset"
@@ -52,4 +53,4 @@ find "$TARGET_DIR" -type f -exec chmod 0664 {} +
 log "Membersihkan cache..."
 cd "$PANEL_DIR"
 php artisan optimize:clear >/dev/null
-printf '\033[1;32m[OK]\033[0m Pahri Nova full reskin aktif.\n'
+printf '\033[1;32m[OK]\033[0m Pahri Thema New full reskin aktif.\n'
