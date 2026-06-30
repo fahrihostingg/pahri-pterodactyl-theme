@@ -2,13 +2,13 @@ import styled from 'styled-components/macro';
 
 const SubNavigation = styled.div`
     width: min(1180px, calc(100% - 30px));
-    margin: 14px auto 0;
+    margin: 15px auto 0;
     overflow-x: auto;
-    border: 1px solid rgba(255,255,255,.085);
-    border-radius: 18px;
-    background: rgba(5,9,23,.62);
-    box-shadow: 0 16px 48px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.045);
-    backdrop-filter: blur(20px) saturate(145%);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: calc(var(--pahri-radius, 24px) * .76);
+    background: rgba(5,9,23,calc(var(--pahri-glass-opacity,.78) * .74));
+    box-shadow: 0 20px 62px rgba(0,0,0,.31), inset 0 1px rgba(255,255,255,.05);
+    backdrop-filter: blur(var(--pahri-blur, 24px)) saturate(155%);
 
     & > div {
         min-width: max-content;
@@ -20,17 +20,33 @@ const SubNavigation = styled.div`
 
     & > div > a,
     & > div > div {
-        min-height: 40px;
-        padding: 0 13px;
+        min-height: 41px;
+        padding: 0 14px;
+        position: relative;
         display: inline-flex;
         align-items: center;
         border: 1px solid transparent;
-        border-radius: 12px;
-        color: rgba(226,232,240,.52);
-        font-size: 11px;
-        font-weight: 720;
+        border-radius: calc(var(--pahri-radius, 24px) * .52);
+        color: rgba(226,232,240,.5);
+        font-size: 10px;
+        font-weight: 760;
+        letter-spacing: .015em;
         text-decoration: none;
         white-space: nowrap;
+        transition: .21s ease;
+    }
+
+    & > div > a::after {
+        content: '';
+        position: absolute;
+        left: 26%;
+        right: 26%;
+        bottom: 5px;
+        height: 2px;
+        border-radius: 999px;
+        opacity: 0;
+        background: linear-gradient(90deg, var(--pahri-accent), var(--pahri-accent-secondary));
+        box-shadow: 0 0 12px var(--pahri-accent);
         transition: .2s ease;
     }
 
@@ -39,8 +55,12 @@ const SubNavigation = styled.div`
         color: #fff;
         border-color: rgba(255,255,255,.09);
         background: linear-gradient(135deg, color-mix(in srgb, var(--pahri-accent) 20%, transparent), color-mix(in srgb, var(--pahri-accent-secondary) 10%, transparent));
-        box-shadow: inset 0 1px rgba(255,255,255,.05), 0 8px 24px rgba(0,0,0,.22);
+        box-shadow: inset 0 1px rgba(255,255,255,.055), 0 10px 28px rgba(0,0,0,.24);
+        transform: translateY(-1px);
     }
+
+    & > div > a:hover::after,
+    & > div > a.active::after { opacity: 1; }
 `;
 
 export default SubNavigation;
