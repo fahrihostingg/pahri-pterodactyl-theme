@@ -1,7 +1,12 @@
 {
     "accent": "#8b5cf6",
-    "accent_secondary": "#06b6d4",
+    "accent_secondary": "#22d3ee",
+    "surface_opacity": 78,
+    "blur": 24,
+    "radius": 24,
+    "motion": 100,
     "animation": true,
+    "particles": true,
     "logo": "/themes/pahri/default-logo.svg",
     "wallpaper": "/themes/pahri/default-wallpaper.svg"
 }
