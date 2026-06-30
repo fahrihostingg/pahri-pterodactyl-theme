@@ -1,0 +1,26 @@
+name: Validate Theme
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate shell scripts
+        run: |
+          bash -n install.sh uninstall.sh update.sh
+          bash -n scripts/install-local.sh scripts/uninstall-local.sh scripts/build-release.sh
+
+      - name: Validate Python patcher
+        run: python3 -m py_compile patcher.py
+
+      - name: Validate PHP controller
+        run: php -l files/app/Http/Controllers/Admin/Settings/AppearanceController.php
+
+      - name: Build release package
+        run: bash scripts/build-release.sh
