@@ -11,6 +11,7 @@ fi
 TEMP_DIR=""
 
 log() { printf '\033[1;36m[PAHRI GITHUB]\033[0m %s\n' "$*"; }
+ok() { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 
 cleanup() {
@@ -25,10 +26,23 @@ run_local_installer() {
     [[ -f "$root/scripts/install-source.sh" ]] || die "scripts/install-source.sh tidak dijumpai."
     [[ -d "$root/files" ]] || die "Folder files tidak dijumpai dalam pakej tema."
     [[ -d "$root/source" ]] || die "Folder source tidak dijumpai dalam pakej tema."
+    [[ -f "$root/files/public/themes/pahri/thema-new.js" ]] || die "Runtime Pahri Thema New tidak dijumpai."
+    [[ -f "$root/source/resources/scripts/components/PahriBroadcast.tsx" ]] || die "Komponen Broadcast Center tidak dijumpai."
 
     bash "$root/scripts/install-local.sh"
     bash "$root/scripts/install-v2.sh"
     bash "$root/scripts/install-source.sh"
+
+    local version="5.0.0"
+    if [[ -f "$root/VERSION" ]]; then
+        version="$(tr -d '[:space:]' < "$root/VERSION")"
+    fi
+
+    printf '\n'
+    ok "Pahri Thema New ${version} berjaya dipasang sepenuhnya."
+    printf 'Admin Studio: /admin/settings/appearance\n'
+    printf 'Command Engine: Ctrl + K\n'
+    printf 'Broadcast Center: Admin Panel > Settings > Pahri Thema New\n'
 }
 
 if [[ -n "$SELF_DIR" && -f "$SELF_DIR/scripts/install-local.sh" && -d "$SELF_DIR/files" ]]; then
