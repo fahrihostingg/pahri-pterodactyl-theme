@@ -1,0 +1,15 @@
+name: Validate Nova
+on:
+  push:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check installer
+        run: bash -n install.sh scripts/install-v2.sh
+      - name: Check patcher
+        run: python3 -m py_compile patcher-v2.py
+      - name: Check assets
+        run: test -s files/public/themes/pahri/brand.js && test -s files/public/themes/pahri/nova-client-shell.css && test -s files/public/themes/pahri/nova-admin-header.css
