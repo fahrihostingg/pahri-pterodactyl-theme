@@ -28,6 +28,7 @@ class AppearanceController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+            'preset' => ['required', 'in:obsidian,aurora,imperial,emerald,custom'],
             'accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'accent_secondary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'surface_opacity' => ['required', 'integer', 'between:55,95'],
@@ -36,11 +37,34 @@ class AppearanceController extends Controller
             'motion' => ['required', 'integer', 'between:50,180'],
             'animation' => ['nullable', 'boolean'],
             'particles' => ['nullable', 'boolean'],
+            'status_label' => ['required', 'string', 'max:36'],
             'logo' => ['nullable', 'file', 'mimetypes:image/png,image/jpeg,image/webp', 'max:4096'],
             'wallpaper' => ['nullable', 'file', 'mimetypes:image/png,image/jpeg,image/webp', 'max:12288'],
+
+            'broadcast_active' => ['nullable', 'boolean'],
+            'broadcast_title' => ['nullable', 'string', 'max:120'],
+            'broadcast_message' => ['nullable', 'string', 'max:1200'],
+            'broadcast_type' => ['required', 'in:info,success,warning,danger'],
+            'broadcast_mode' => ['required', 'in:banner,modal'],
+            'broadcast_audience' => ['required', 'in:all,admins,clients'],
+            'broadcast_dismissible' => ['nullable', 'boolean'],
+            'broadcast_starts_at' => ['nullable', 'date'],
+            'broadcast_ends_at' => ['nullable', 'date', 'after:broadcast_starts_at'],
+            'broadcast_button_text' => ['nullable', 'string', 'max:40'],
+            'broadcast_button_url' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
+
+            'quick_link_label_1' => ['nullable', 'string', 'max:40'],
+            'quick_link_url_1' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
+            'quick_link_label_2' => ['nullable', 'string', 'max:40'],
+            'quick_link_url_2' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
+            'quick_link_label_3' => ['nullable', 'string', 'max:40'],
+            'quick_link_url_3' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
         ]);
 
         $settings = array_merge($this->defaults(), $this->readSettings(), [
+            'theme_name' => 'Pahri Thema New',
+            'theme_version' => '5.0.0',
+            'preset' => $validated['preset'],
             'accent' => strtolower($validated['accent']),
             'accent_secondary' => strtolower($validated['accent_secondary']),
             'surface_opacity' => (int) $validated['surface_opacity'],
@@ -49,6 +73,31 @@ class AppearanceController extends Controller
             'motion' => (int) $validated['motion'],
             'animation' => $request->boolean('animation'),
             'particles' => $request->boolean('particles'),
+            'status_label' => trim($validated['status_label']),
+            'broadcast' => [
+                'active' => $request->boolean('broadcast_active'),
+                'title' => trim((string) ($validated['broadcast_title'] ?? '')),
+                'message' => trim((string) ($validated['broadcast_message'] ?? '')),
+                'type' => $validated['broadcast_type'],
+                'mode' => $validated['broadcast_mode'],
+                'audience' => $validated['broadcast_audience'],
+                'dismissible' => $request->boolean('broadcast_dismissible'),
+                'starts_at' => $validated['broadcast_starts_at'] ?? null,
+                'ends_at' => $validated['broadcast_ends_at'] ?? null,
+                'button_text' => trim((string) ($validated['broadcast_button_text'] ?? '')),
+                'button_url' => trim((string) ($validated['broadcast_button_url'] ?? '')),
+                'revision' => hash('sha256', implode('|', [
+                    (string) ($validated['broadcast_title'] ?? ''),
+                    (string) ($validated['broadcast_message'] ?? ''),
+                    $validated['broadcast_type'],
+                    $validated['broadcast_mode'],
+                    $validated['broadcast_audience'],
+                    (string) ($validated['broadcast_starts_at'] ?? ''),
+                    (string) ($validated['broadcast_ends_at'] ?? ''),
+                ])),
+            ],
+            'quick_links' => $this->quickLinks($validated),
+            'updated_at' => now()->toIso8601String(),
         ]);
 
         File::ensureDirectoryExists($this->themePath('uploads'), 0755, true);
@@ -64,7 +113,7 @@ class AppearanceController extends Controller
         $this->writeSettings($settings);
         $this->writeCustomCss($settings);
 
-        $this->alert->success('Pahri Aurelia berjaya dikemas kini. Semua tetapan visual telah digunakan.')->flash();
+        $this->alert->success('Pahri Thema New berjaya dikemas kini. Visual Engine, Broadcast Center dan Quick Links telah digunakan.')->flash();
 
         return redirect()->route('admin.settings.appearance');
     }
@@ -72,16 +121,36 @@ class AppearanceController extends Controller
     private function defaults(): array
     {
         return [
-            'accent' => '#8b5cf6',
+            'theme_name' => 'Pahri Thema New',
+            'theme_version' => '5.0.0',
+            'preset' => 'obsidian',
+            'accent' => '#a855f7',
             'accent_secondary' => '#22d3ee',
             'surface_opacity' => 78,
-            'blur' => 24,
+            'blur' => 26,
             'radius' => 24,
             'motion' => 100,
             'animation' => true,
             'particles' => true,
+            'status_label' => 'NEXUS ONLINE',
             'logo' => '/themes/pahri/default-logo.svg',
             'wallpaper' => '/themes/pahri/default-wallpaper.svg',
+            'broadcast' => [
+                'active' => false,
+                'title' => '',
+                'message' => '',
+                'type' => 'info',
+                'mode' => 'banner',
+                'audience' => 'all',
+                'dismissible' => true,
+                'starts_at' => null,
+                'ends_at' => null,
+                'button_text' => '',
+                'button_url' => '',
+                'revision' => 'initial',
+            ],
+            'quick_links' => [],
+            'updated_at' => null,
         ];
     }
 
@@ -95,7 +164,31 @@ class AppearanceController extends Controller
 
         $decoded = json_decode((string) File::get($path), true);
 
-        return is_array($decoded) ? array_merge($this->defaults(), $decoded) : $this->defaults();
+        if (!is_array($decoded)) {
+            return $this->defaults();
+        }
+
+        $settings = array_merge($this->defaults(), $decoded);
+        $settings['broadcast'] = array_merge($this->defaults()['broadcast'], is_array($decoded['broadcast'] ?? null) ? $decoded['broadcast'] : []);
+        $settings['quick_links'] = is_array($decoded['quick_links'] ?? null) ? $decoded['quick_links'] : [];
+
+        return $settings;
+    }
+
+    private function quickLinks(array $validated): array
+    {
+        $links = [];
+
+        for ($index = 1; $index <= 3; $index++) {
+            $label = trim((string) ($validated['quick_link_label_' . $index] ?? ''));
+            $url = trim((string) ($validated['quick_link_url_' . $index] ?? ''));
+
+            if ($label !== '' && $url !== '') {
+                $links[] = ['label' => $label, 'url' => $url];
+            }
+        }
+
+        return $links;
     }
 
     private function writeSettings(array $settings): void
@@ -108,7 +201,7 @@ class AppearanceController extends Controller
 
         if (!@rename($temporary, $path)) {
             @unlink($temporary);
-            throw new RuntimeException('Tidak dapat menyimpan settings.json untuk Pahri Theme. Semak permission folder public/themes/pahri.');
+            throw new RuntimeException('Tidak dapat menyimpan settings.json untuk Pahri Thema New. Semak permission folder public/themes/pahri.');
         }
     }
 
