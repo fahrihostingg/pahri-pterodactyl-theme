@@ -1,12 +1,32 @@
 {
-    "accent": "#8b5cf6",
+    "theme_name": "Pahri Thema New",
+    "theme_version": "5.0.0",
+    "preset": "obsidian",
+    "accent": "#a855f7",
     "accent_secondary": "#22d3ee",
     "surface_opacity": 78,
-    "blur": 24,
+    "blur": 26,
     "radius": 24,
     "motion": 100,
     "animation": true,
     "particles": true,
+    "status_label": "NEXUS ONLINE",
     "logo": "/themes/pahri/default-logo.svg",
-    "wallpaper": "/themes/pahri/default-wallpaper.svg"
+    "wallpaper": "/themes/pahri/default-wallpaper.svg",
+    "broadcast": {
+        "active": false,
+        "title": "",
+        "message": "",
+        "type": "info",
+        "mode": "banner",
+        "audience": "all",
+        "dismissible": true,
+        "starts_at": null,
+        "ends_at": null,
+        "button_text": "",
+        "button_url": "",
+        "revision": "initial"
+    },
+    "quick_links": [],
+    "updated_at": null
 }
