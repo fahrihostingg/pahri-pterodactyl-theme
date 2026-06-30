@@ -1,6 +1,6 @@
 {
   "name": "Pahri Thema New",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "codename": "Nexus",
   "author": "Pahri",
   "watermark": "by Pahri",
@@ -15,6 +15,7 @@
     "nexus command engine",
     "admin quick links",
     "visual presets",
-    "interactive holographic server cards"
+    "interactive holographic server cards",
+    "visible checked-state controls"
   ]
 }
