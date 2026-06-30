@@ -15,7 +15,7 @@ ok() { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[WARN]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 
-FILES=(
+REPLACE_FILES=(
     "resources/scripts/components/App.tsx"
     "resources/scripts/components/NavigationBar.tsx"
     "resources/scripts/components/auth/LoginContainer.tsx"
@@ -27,13 +27,22 @@ FILES=(
     "resources/scripts/routers/AuthenticationRouter.tsx"
 )
 
+EXTRA_FILES=(
+    "resources/scripts/components/PahriBroadcast.tsx"
+)
+
+ALL_FILES=("${REPLACE_FILES[@]}" "${EXTRA_FILES[@]}")
+
 [[ $EUID -eq 0 ]] || die "Jalankan pemasang sebagai root."
 [[ -f "$PANEL_DIR/artisan" ]] || die "Pterodactyl tidak dijumpai di $PANEL_DIR"
 [[ -f "$PANEL_DIR/package.json" ]] || die "package.json panel tidak dijumpai."
 [[ -f "$PANEL_DIR/yarn.lock" ]] || die "yarn.lock panel tidak dijumpai."
 
-for relative in "${FILES[@]}"; do
+for relative in "${REPLACE_FILES[@]}"; do
     [[ -f "$PANEL_DIR/$relative" ]] || die "Source panel tiada: $relative"
+done
+
+for relative in "${ALL_FILES[@]}"; do
     [[ -f "$SOURCE_DIR/$relative" ]] || die "Source tema tiada: $relative"
 done
 
@@ -98,11 +107,25 @@ ensure_yarn() {
     ok "Yarn $(yarn --version) berjaya disediakan."
 }
 
-copy_files() {
+copy_theme_files() {
     local from="$1"
     local to="$2"
-    for relative in "${FILES[@]}"; do
+    for relative in "${ALL_FILES[@]}"; do
+        [[ -f "$from/$relative" ]] || continue
         install -D -m 0644 "$from/$relative" "$to/$relative"
+    done
+}
+
+backup_current_files() {
+    local target="$1"
+    mkdir -p "$target"
+    for relative in "${REPLACE_FILES[@]}"; do
+        install -D -m 0644 "$PANEL_DIR/$relative" "$target/$relative"
+    done
+    for relative in "${EXTRA_FILES[@]}"; do
+        if [[ -f "$PANEL_DIR/$relative" ]]; then
+            install -D -m 0644 "$PANEL_DIR/$relative" "$target/$relative"
+        fi
     done
 }
 
@@ -117,7 +140,19 @@ build_panel() {
 restore_run_backup() {
     [[ -n "$RUN_BACKUP" && -d "$RUN_BACKUP" ]] || return 0
     warn "Build gagal. Memulihkan source sebelum pemasangan..."
-    copy_files "$RUN_BACKUP" "$PANEL_DIR"
+
+    for relative in "${REPLACE_FILES[@]}"; do
+        install -D -m 0644 "$RUN_BACKUP/$relative" "$PANEL_DIR/$relative"
+    done
+
+    for relative in "${EXTRA_FILES[@]}"; do
+        if [[ -f "$RUN_BACKUP/$relative" ]]; then
+            install -D -m 0644 "$RUN_BACKUP/$relative" "$PANEL_DIR/$relative"
+        else
+            rm -f "$PANEL_DIR/$relative"
+        fi
+    done
+
     (build_panel) || warn "Source dipulihkan tetapi rebuild asal gagal. Jalankan yarn build:production secara manual."
 }
 
@@ -134,13 +169,14 @@ ensure_node
 ensure_yarn
 
 RUN_BACKUP="$PANEL_DIR/.pahri-source-run-backups/$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$RUN_BACKUP"
-copy_files "$PANEL_DIR" "$RUN_BACKUP"
+backup_current_files "$RUN_BACKUP"
 
 if [[ ! -f "$STATE_FILE" ]]; then
     ORIGINAL_BACKUP="$PANEL_DIR/.pahri-source-backups/$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$ORIGINAL_BACKUP"
-    copy_files "$PANEL_DIR" "$ORIGINAL_BACKUP"
+    for relative in "${REPLACE_FILES[@]}"; do
+        install -D -m 0644 "$PANEL_DIR/$relative" "$ORIGINAL_BACKUP/$relative"
+    done
     printf '%s\n' "$ORIGINAL_BACKUP" > "$STATE_FILE"
     log "Backup source asal: $ORIGINAL_BACKUP"
 else
@@ -148,19 +184,19 @@ else
     warn "Source theme telah dipasang. Mengemas kini tanpa menimpa backup asal."
 fi
 
-log "Menyalin komponen Pahri Luxury 3D..."
-copy_files "$SOURCE_DIR" "$PANEL_DIR"
+log "Menyalin komponen Pahri Thema New 5.0..."
+copy_theme_files "$SOURCE_DIR" "$PANEL_DIR"
 
 log "Membina frontend production dengan Node $(node -v) dan Yarn $(yarn --version)..."
 build_panel
 
 PANEL_OWNER="$(stat -c '%U:%G' "$PANEL_DIR/artisan")"
 chown -R "$PANEL_OWNER" "$PANEL_DIR/public/assets"
-for relative in "${FILES[@]}"; do
+for relative in "${ALL_FILES[@]}"; do
     chown "$PANEL_OWNER" "$PANEL_DIR/$relative"
 done
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Luxury 3D source theme berjaya dibina dan diaktifkan."
+ok "Pahri Thema New 5.0 berjaya dibina dan diaktifkan."
 printf 'Backup asal: %s\n' "$ORIGINAL_BACKUP"
