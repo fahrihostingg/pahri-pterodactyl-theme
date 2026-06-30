@@ -1,0 +1,1 @@
+Validate Node.js 24 auto-install update.
