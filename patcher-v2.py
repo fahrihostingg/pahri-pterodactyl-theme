@@ -20,6 +20,14 @@ def inject(text: str, anchor: str, addition: str, marker: str, label: str) -> st
     return text.replace(anchor, anchor + addition, 1)
 
 
+def replace_once(text: str, old: str, new: str, marker: str, label: str) -> str:
+    if marker in text:
+        return text
+    if old not in text:
+        raise SystemExit(f'[ERROR] Branding asal tidak dijumpai dalam {label}.')
+    return text.replace(old, new, 1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--panel', required=True)
@@ -47,6 +55,14 @@ def main() -> None:
         str(wrapper),
     )
 
+    wrapper_text = replace_once(
+        wrapper_text,
+        "        <title>{{ config('app.name', 'Pterodactyl') }}</title>",
+        "        <title>Pahri Panel</title><!-- PAHRI NOVA CLIENT TITLE -->",
+        'PAHRI NOVA CLIENT TITLE',
+        str(wrapper),
+    )
+
     admin_anchor = "            <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">"
     admin_assets = '''
             <link rel="stylesheet" href="/themes/pahri/nova-admin-header.css?v={{ @filemtime(public_path('themes/pahri/nova-admin-header.css')) ?: 1 }}">
@@ -57,12 +73,25 @@ def main() -> None:
             <script defer src="/themes/pahri/brand.js?v={{ @filemtime(public_path('themes/pahri/brand.js')) ?: 1 }}"></script>'''
     admin_text = inject(admin_text, admin_anchor, admin_assets, 'nova-admin-header.css', str(admin))
 
+    admin_text = replace_once(
+        admin_text,
+        "        <title>{{ config('app.name', 'Pterodactyl') }} - @yield('title')</title>",
+        "        <title>Pahri Panel - @yield('title')</title><!-- PAHRI NOVA ADMIN TITLE -->",
+        'PAHRI NOVA ADMIN TITLE',
+        str(admin),
+    )
+
+    admin_text = replace_once(
+        admin_text,
+        "                    <span class=\"pahri-admin-logo-text\">{{ config('app.name', 'Pterodactyl') }}</span>",
+        "                    <span class=\"pahri-admin-logo-text\">Pahri Panel</span><!-- PAHRI NOVA BRAND -->",
+        'PAHRI NOVA BRAND',
+        str(admin),
+    )
+
     old_footer = 'Copyright &copy; 2015 - {{ date(\'Y\') }} <a href="https://pterodactyl.io/">Pterodactyl Software</a>.'
     new_footer = '<span class="pahri-footer-brand">Pahri Panel &copy; {{ date(\'Y\') }} &mdash; Built by Pahri</span><!-- PAHRI NOVA FOOTER -->'
-    if 'PAHRI NOVA FOOTER' not in admin_text:
-        if old_footer not in admin_text:
-            raise SystemExit('[ERROR] Footer asal tidak dijumpai. Patch dihentikan.')
-        admin_text = admin_text.replace(old_footer, new_footer, 1)
+    admin_text = replace_once(admin_text, old_footer, new_footer, 'PAHRI NOVA FOOTER', str(admin))
 
     write(wrapper, wrapper_text)
     write(admin, admin_text)
