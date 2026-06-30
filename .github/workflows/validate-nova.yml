@@ -2,14 +2,50 @@ name: Validate Nova
 on:
   push:
     branches: [main]
+  pull_request:
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Check installer
-        run: bash -n install.sh scripts/install-v2.sh
-      - name: Check patcher
-        run: python3 -m py_compile patcher-v2.py
-      - name: Check assets
-        run: test -s files/public/themes/pahri/brand.js && test -s files/public/themes/pahri/nova-client-shell.css && test -s files/public/themes/pahri/nova-admin-header.css
+      - name: Checkout theme
+        uses: actions/checkout@v4
+
+      - name: Check scripts
+        run: |
+          bash -n install.sh scripts/install-v2.sh scripts/install-source.sh
+          python3 -m py_compile patcher-v2.py
+
+      - name: Checkout Pterodactyl v1.14.1
+        uses: actions/checkout@v4
+        with:
+          repository: pterodactyl/panel
+          ref: v1.14.1
+          path: panel
+
+      - name: Apply Pahri source files
+        run: cp -a source/. panel/
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+          cache-dependency-path: panel/yarn.lock
+
+      - name: Enable Yarn classic
+        run: corepack enable && corepack prepare yarn@1.22.22 --activate
+
+      - name: Install frontend dependencies
+        working-directory: panel
+        run: yarn install --frozen-lockfile --network-timeout 600000
+
+      - name: Type-check Pahri source theme
+        working-directory: panel
+        run: yarn tsc
+
+      - name: Build production frontend
+        working-directory: panel
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: yarn build:production
