@@ -1,48 +1,42 @@
-# Pahri Elegant Theme
+# Pahri Luxury 3D Theme
 
-Tema custom untuk **Pterodactyl Panel v1.14.x** dengan UI elegant, glassmorphism, animasi, wallpaper, logo custom dan watermark **by Pahri**.
+Tema source-level untuk **Pterodactyl Panel v1.14.x**. Versi 3.0.0 mengganti UI asal pada login, dashboard, navigation, server cards, page shell, server tabs dan admin panel dengan reka bentuk mewah, glassmorphism dan animasi 3D.
 
-## Fungsi utama
+## Apa yang berubah
 
-- Tema gelap elegant untuk client dan admin panel.
-- Animasi ambient, glow dan glass effect.
-- Watermark `by Pahri`.
-- Butang **Pahri Theme** pada admin panel.
-- Upload logo dan wallpaper daripada admin.
-- Edit dua warna utama tema.
-- Hidup atau matikan animasi.
-- Backup automatik sebelum patch.
-- Pemasangan semula tidak menggandakan route, butang atau CSS.
-- Rollback daripada backup asal.
-- Tidak perlu upload pakej secara manual ke VPS.
+- Login split-layout premium dengan scene 3D bergerak.
+- Navbar client Pahri yang dibina terus dalam React.
+- Dashboard luxury dengan hero 3D dan live server collection.
+- Kad server baharu dengan status, CPU, RAM, disk dan allocation.
+- Semua halaman server menggunakan workspace dan sub-navigation Pahri.
+- Admin panel diubah kepada header, sidebar, card, table dan control gaya mewah.
+- Branding dan footer asal pada paparan diganti dengan Pahri Panel.
+- Logo, wallpaper, warna dan animasi masih boleh diedit melalui admin.
+- Backup Blade, controller, aset dan source React dibuat sebelum pemasangan.
+- Installer membina frontend production menggunakan Node.js 22 atau 24.
+- Auto-restore source sebelumnya jika production build gagal.
+- Uninstall memulihkan source asal dan membina semula frontend asal.
 
-## Repo GitHub yang disyorkan
+## Keperluan
 
-Gunakan nama repo ini supaya arahan default terus berfungsi:
+- Pterodactyl Panel v1.14.x.
+- Struktur yang diuji: v1.14.1.
+- PHP 8.2 atau lebih baharu.
+- Python 3.
+- Node.js 22 atau 24.
+- Yarn Classic. Installer cuba menyediakannya melalui Corepack jika belum tersedia.
+- Sekurang-kurangnya 4 GB RAM disyorkan untuk production build.
 
-```text
-fahrihostingg/pahri-pterodactyl-theme
-```
-
-Repo perlu **Public** untuk pemasangan menggunakan `curl` tanpa token GitHub.
-
-## Cara upload ke GitHub
-
-1. Buat repo baru bernama `pahri-pterodactyl-theme`.
-2. Jangan tambah README atau `.gitignore` daripada GitHub kerana semuanya sudah disediakan.
-3. Extract ZIP repo ini pada komputer.
-4. Upload **semua kandungan di dalam folder**, bukan folder luarnya sahaja.
-5. Pastikan `install.sh`, `uninstall.sh`, `scripts`, `files`, `.github` dan `patcher.py` berada di root repo.
-6. Commit ke branch `main`.
-
-Panduan lebih terperinci ada di [`docs/UPLOAD-TO-GITHUB.md`](docs/UPLOAD-TO-GITHUB.md).
-
-## Install terus daripada GitHub
-
-Jalankan pada VPS panel:
+## Install daripada GitHub
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | sudo bash
+```
+
+Jika sudah login sebagai root:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | bash
 ```
 
 Lokasi panel selain `/var/www/pterodactyl`:
@@ -52,94 +46,93 @@ curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-the
   | sudo env PANEL_DIR=/lokasi/panel bash
 ```
 
-Selepas berjaya:
+Installer menjalankan tiga peringkat:
+
+1. Memasang editor logo, wallpaper dan warna.
+2. Memasang full reskin untuk admin dan Blade shell.
+3. Mengganti komponen React dan menjalankan `yarn build:production`.
+
+Output berjaya akan mengandungi:
+
+```text
+[OK] Pahri Elegant Theme berjaya dipasang.
+[OK] Pahri Nova full reskin aktif.
+[OK] Pahri Luxury 3D source theme berjaya dibina dan diaktifkan.
+```
+
+## Editor tema
 
 ```text
 Admin Panel → Settings → Pahri Theme
 ```
 
-URL terus:
+URL:
 
 ```text
 https://domain-panel.com/admin/settings/appearance
 ```
 
-## Update tema
+Admin boleh menukar:
 
-Arahan install yang sama juga berfungsi sebagai update:
+- Logo panel.
+- Wallpaper.
+- Warna utama.
+- Warna kedua.
+- Animasi ambient.
+
+## Update
+
+Jalankan semula arahan install:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | sudo bash
 ```
 
-Logo, wallpaper, warna dan tetapan semasa tidak dipadam ketika update.
+Backup source asal tidak ditimpa semasa update.
 
-## Uninstall dan rollback
+## Uninstall dan rollback penuh
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/uninstall.sh | sudo bash
 ```
 
-Panel custom path:
+Rollback akan:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/uninstall.sh \
-  | sudo env PANEL_DIR=/lokasi/panel bash
-```
+- Memulihkan komponen React asal.
+- Menjalankan production build asal.
+- Memulihkan Blade, route dan controller asal.
+- Membuang aset Pahri.
+- Membersihkan cache Laravel.
 
-## Jika guna nama repo lain
+## Backup
 
-Gantikan URL raw dan beritahu installer nama repo sebenar:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/main/install.sh \
-  | sudo env PAHRI_THEME_REPO=OWNER/REPO bash
-```
-
-## Pasang daripada tag tertentu
-
-Contoh menggunakan tag `v1.0.0`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/v1.0.0/install.sh \
-  | sudo env PAHRI_THEME_REF=v1.0.0 bash
-```
-
-## Keserasian
-
-- Sasaran: Pterodactyl Panel `v1.14.x`.
-- Struktur diuji: `v1.14.1`.
-- PHP minimum: `8.2`.
-- Python 3 diperlukan untuk patch fail secara selamat.
-- Panel yang sudah diubah oleh tema lain mungkin tidak sepadan. Installer akan berhenti sebelum patch ditulis jika anchor fail tidak ditemui.
-
-## Fail yang dipatch
-
-- `routes/admin.php`
-- `resources/views/layouts/admin.blade.php`
-- `resources/views/templates/wrapper.blade.php`
-- `resources/views/partials/admin/settings/nav.blade.php`
-
-Fail asal disimpan dalam:
+Backup Blade dan tema:
 
 ```text
 /var/www/pterodactyl/.pahri-theme-backups/
 ```
 
-## Pemeriksaan selepas install
+Backup source React asal:
+
+```text
+/var/www/pterodactyl/.pahri-source-backups/
+```
+
+## Jika paparan lama masih dicache
 
 ```bash
 cd /var/www/pterodactyl
-php artisan route:list --path=admin/settings/appearance
 php artisan optimize:clear
 ```
 
-Semak log Laravel:
+Kemudian lakukan hard refresh pada browser:
 
-```bash
-tail -n 100 /var/www/pterodactyl/storage/logs/laravel-$(date +%F).log
+```text
+Ctrl + Shift + R
 ```
 
-## Nota penting sebelum update Pterodactyl
+Jika menggunakan Cloudflare Proxy, purge cache domain panel selepas production build selesai.
 
-Buang tema terlebih dahulu, update panel, kemudian pasang semula hanya selepas versi tema disahkan serasi dengan versi panel baharu.
+## Nota sebelum update Pterodactyl
+
+Uninstall tema terlebih dahulu, update Pterodactyl, kemudian pasang versi tema yang telah disahkan serasi dengan versi panel baharu.
