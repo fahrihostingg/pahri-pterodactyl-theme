@@ -13,49 +13,82 @@ export interface PageContentBlockProps {
 const Page = styled.div`
     position: relative;
     min-height: calc(100vh - 100px);
-    padding: 12px 0 28px;
+    padding: 14px 0 30px;
 `;
 
 const Header = styled.div`
     width: min(1200px, calc(100% - 30px));
-    margin: 20px auto 8px;
-    padding: 0 2px;
+    margin: 22px auto 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
     display: flex;
-    align-items: end;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
+    border: 1px solid rgba(255,255,255,.075);
+    border-radius: calc(var(--pahri-radius, 24px) * .82);
+    background: rgba(5,9,23,calc(var(--pahri-glass-opacity,.78) * .55));
+    box-shadow: 0 18px 58px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.045);
+    backdrop-filter: blur(var(--pahri-blur, 24px)) saturate(145%);
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 18px;
+        bottom: 18px;
+        width: 3px;
+        border-radius: 999px;
+        background: linear-gradient(var(--pahri-accent), var(--pahri-accent-secondary));
+        box-shadow: 0 0 18px var(--pahri-accent);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -80px;
+        top: -120px;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--pahri-accent) 14%, transparent);
+        filter: blur(28px);
+    }
 
     h1 {
         margin: 0;
         color: #fff;
-        font-size: clamp(25px, 3vw, 40px);
-        font-weight: 880;
+        font-size: clamp(26px, 3vw, 41px);
+        font-weight: 890;
         line-height: 1;
-        letter-spacing: -.055em;
+        letter-spacing: -.058em;
     }
 
     p {
         margin: 8px 0 0;
-        color: rgba(226,232,240,.48);
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .11em;
+        color: rgba(226,232,240,.42);
+        font-size: 9px;
+        font-weight: 820;
+        letter-spacing: .14em;
         text-transform: uppercase;
     }
 `;
 
 const Badge = styled.span`
+    position: relative;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     gap: 7px;
     padding: 8px 11px;
     border: 1px solid rgba(255,255,255,.09);
     border-radius: 999px;
-    color: rgba(226,232,240,.55);
-    background: rgba(5,9,23,.45);
-    font-size: 9px;
-    font-weight: 850;
-    letter-spacing: .11em;
+    color: rgba(226,232,240,.52);
+    background: rgba(5,9,23,.55);
+    font-size: 8px;
+    font-weight: 880;
+    letter-spacing: .13em;
     text-transform: uppercase;
     backdrop-filter: blur(14px);
 
@@ -72,46 +105,46 @@ const Badge = styled.span`
 `;
 
 const Body = styled(ContentContainer)`
-    margin-top: 18px;
-    margin-bottom: 26px;
+    margin-top: 20px;
+    margin-bottom: 28px;
 `;
 
 const Footer = styled.footer`
     width: min(1200px, calc(100% - 30px));
-    margin: 18px auto 0;
-    padding: 18px 4px 2px;
+    margin: 20px auto 0;
+    padding: 20px 4px 2px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid rgba(255,255,255,.06);
-    color: rgba(226,232,240,.3);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .12em;
+    border-top: 1px solid rgba(255,255,255,.055);
+    color: rgba(226,232,240,.27);
+    font-size: 8px;
+    font-weight: 850;
+    letter-spacing: .14em;
     text-transform: uppercase;
 
-    strong { color: rgba(255,255,255,.48); }
+    strong { color: rgba(255,255,255,.5); }
 `;
 
 const PageContentBlock: React.FC<PageContentBlockProps> = ({ title, showFlashKey, className, children }) => {
     useEffect(() => {
-        document.title = title ? `${title} — Pahri Panel` : 'Pahri Panel';
+        document.title = title ? `${title} — Pahri Aurelia` : 'Pahri Aurelia';
     }, [title]);
 
     return (
-        <CSSTransition timeout={240} classNames={'fade'} appear in>
+        <CSSTransition timeout={260} classNames={'fade'} appear in>
             <Page className={className}>
                 {title && (
                     <Header>
-                        <div><h1>{title}</h1><p>Luxury infrastructure workspace</p></div>
-                        <Badge>Protected session</Badge>
+                        <div><h1>{title}</h1><p>Aurelia spatial infrastructure workspace</p></div>
+                        <Badge>Protected environment</Badge>
                     </Header>
                 )}
                 <Body>
                     {showFlashKey && <FlashMessageRender byKey={showFlashKey} />}
                     {children}
                 </Body>
-                <Footer><span><strong>Pahri Panel</strong> / Control Environment</span><span>by Pahri</span></Footer>
+                <Footer><span><strong>Pahri Aurelia</strong> / Spatial Control Environment</span><span>Version 4.0 • by Pahri</span></Footer>
             </Page>
         </CSSTransition>
     );
