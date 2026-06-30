@@ -236,7 +236,15 @@ const App = () => {
                 <Shape $size={210} $top={'7%'} $left={'78%'} $delay={'-2s'} />
                 <Shape $size={128} $top={'64%'} $left={'6%'} $delay={'-8s'} />
                 <Shape $size={78} $top={'42%'} $left={'59%'} $delay={'-13s'} />
-                {particles.map((particle, index) => <Particle key={index} {...particle} />)}
+                {particles.map((particle, index) => (
+                    <Particle
+                        key={index}
+                        $left={particle.left}
+                        $delay={particle.delay}
+                        $duration={particle.duration}
+                        $size={particle.size}
+                    />
+                ))}
                 <Grain />
             </Scene>
             <StoreProvider store={store}>
