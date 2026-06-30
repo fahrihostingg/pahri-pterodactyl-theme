@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+__pycache__/
+*.py[cod]
+dist/
+.pahri-test/
+files/public/themes/pahri/uploads/*
+!files/public/themes/pahri/uploads/.gitkeep
