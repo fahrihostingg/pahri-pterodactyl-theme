@@ -37,23 +37,65 @@ for relative in "${FILES[@]}"; do
     [[ -f "$SOURCE_DIR/$relative" ]] || die "Source tema tiada: $relative"
 done
 
-command -v node >/dev/null 2>&1 || die "Node.js diperlukan. Pasang Node.js 22 atau 24."
-NODE_MAJOR="$(node -p "Number(process.versions.node.split('.')[0])")"
-(( NODE_MAJOR >= 22 )) || die "Node.js 22 atau lebih baharu diperlukan. Dikesan: $(node -v)"
+ensure_node() {
+    local current_major=0
+    if command -v node >/dev/null 2>&1; then
+        current_major="$(node -p "Number(process.versions.node.split('.')[0])" 2>/dev/null || echo 0)"
+        if (( current_major >= 22 )); then
+            log "Node.js sedia ada dikesan: $(node -v)"
+            return
+        fi
+        warn "Node.js $(node -v) terlalu lama. Menaik taraf ke Node.js 24..."
+    else
+        log "Node.js belum dipasang. Memasang Node.js 24 secara automatik..."
+    fi
+
+    command -v apt-get >/dev/null 2>&1 || die "Auto-install Node.js hanya disokong pada Ubuntu/Debian. Pasang Node.js 22 atau 24 secara manual."
+
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y ca-certificates curl gnupg
+
+    local setup_file
+    setup_file="$(mktemp -t nodesource-setup.XXXXXX.sh)"
+    curl --fail --location --silent --show-error \
+        --retry 3 --retry-delay 2 --connect-timeout 20 \
+        https://deb.nodesource.com/setup_24.x \
+        --output "$setup_file"
+
+    [[ -s "$setup_file" ]] || die "Skrip pemasangan NodeSource kosong."
+    bash "$setup_file"
+    rm -f "$setup_file"
+
+    apt-get install -y nodejs
+    hash -r
+
+    command -v node >/dev/null 2>&1 || die "Node.js gagal dipasang."
+    current_major="$(node -p "Number(process.versions.node.split('.')[0])")"
+    (( current_major >= 22 )) || die "Versi Node.js selepas pemasangan masih tidak sesuai: $(node -v)"
+    ok "Node.js $(node -v) berjaya dipasang."
+}
 
 ensure_yarn() {
     if command -v yarn >/dev/null 2>&1; then
+        log "Yarn sedia ada dikesan: $(yarn --version)"
         return
     fi
+
+    log "Menyediakan Yarn Classic 1.22.22..."
     if command -v corepack >/dev/null 2>&1; then
-        corepack enable
-        corepack prepare yarn@1.22.22 --activate
-    elif command -v npm >/dev/null 2>&1; then
-        npm install --global yarn@1.22.22
-    else
-        die "Yarn tidak dijumpai dan tidak boleh dipasang secara automatik."
+        corepack enable || true
+        corepack prepare yarn@1.22.22 --activate || true
     fi
+
+    if ! command -v yarn >/dev/null 2>&1; then
+        command -v npm >/dev/null 2>&1 || die "npm tidak dijumpai selepas pemasangan Node.js."
+        npm install --global yarn@1.22.22
+        hash -r
+    fi
+
     command -v yarn >/dev/null 2>&1 || die "Yarn gagal disediakan."
+    ok "Yarn $(yarn --version) berjaya disediakan."
 }
 
 copy_files() {
@@ -88,6 +130,7 @@ on_error() {
 }
 trap on_error ERR
 
+ensure_node
 ensure_yarn
 
 RUN_BACKUP="$PANEL_DIR/.pahri-source-run-backups/$(date +%Y%m%d-%H%M%S)"
