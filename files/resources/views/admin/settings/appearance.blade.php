@@ -99,20 +99,22 @@
 
                             <div class="row">
                                 <div class="col-sm-6">
-                                    <div class="checkbox">
+                                    <div class="checkbox pahri-checkbox">
                                         <label>
                                             <input type="hidden" name="animation" value="0">
-                                            <input type="checkbox" name="animation" value="1" @checked(old('animation', $settings['animation']))>
-                                            Aktifkan animasi aurora, 3D dan glow
+                                            <input class="pahri-checkbox-input" type="checkbox" name="animation" value="1" @checked(old('animation', $settings['animation']))>
+                                            <span class="pahri-checkbox-ui" aria-hidden="true"></span>
+                                            <span class="pahri-checkbox-label">Aktifkan animasi aurora, 3D dan glow</span>
                                         </label>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="checkbox">
+                                    <div class="checkbox pahri-checkbox">
                                         <label>
                                             <input type="hidden" name="particles" value="0">
-                                            <input type="checkbox" name="particles" value="1" @checked(old('particles', $settings['particles']))>
-                                            Aktifkan star particles dan ambient dust
+                                            <input class="pahri-checkbox-input" type="checkbox" name="particles" value="1" @checked(old('particles', $settings['particles']))>
+                                            <span class="pahri-checkbox-ui" aria-hidden="true"></span>
+                                            <span class="pahri-checkbox-label">Aktifkan star particles dan ambient dust</span>
                                         </label>
                                     </div>
                                 </div>
@@ -125,11 +127,12 @@
                                 <p>Hantar pengumuman kepada semua pengguna, admin sahaja, atau client sahaja. Broadcast boleh keluar sebagai banner atau modal cinematic.</p>
                             </div>
 
-                            <div class="checkbox">
+                            <div class="checkbox pahri-checkbox">
                                 <label>
                                     <input type="hidden" name="broadcast_active" value="0">
-                                    <input type="checkbox" name="broadcast_active" value="1" @checked(old('broadcast_active', $broadcast['active'] ?? false))>
-                                    Aktifkan broadcast sekarang
+                                    <input class="pahri-checkbox-input" type="checkbox" name="broadcast_active" value="1" @checked(old('broadcast_active', $broadcast['active'] ?? false))>
+                                    <span class="pahri-checkbox-ui" aria-hidden="true"></span>
+                                    <span class="pahri-checkbox-label">Aktifkan broadcast sekarang</span>
                                 </label>
                             </div>
 
@@ -171,11 +174,12 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label>&nbsp;</label>
-                                    <div class="checkbox" style="margin-top: 8px;">
+                                    <div class="checkbox pahri-checkbox" style="margin-top: 8px;">
                                         <label>
                                             <input type="hidden" name="broadcast_dismissible" value="0">
-                                            <input type="checkbox" name="broadcast_dismissible" value="1" @checked(old('broadcast_dismissible', $broadcast['dismissible'] ?? true))>
-                                            Pengguna boleh tutup
+                                            <input class="pahri-checkbox-input" type="checkbox" name="broadcast_dismissible" value="1" @checked(old('broadcast_dismissible', $broadcast['dismissible'] ?? true))>
+                                            <span class="pahri-checkbox-ui" aria-hidden="true"></span>
+                                            <span class="pahri-checkbox-label">Pengguna boleh tutup</span>
                                         </label>
                                     </div>
                                 </div>
@@ -253,7 +257,7 @@
                             <img src="{{ $settings['logo'] }}?v={{ @filemtime(public_path(ltrim($settings['logo'], '/'))) ?: 1 }}" alt="Pahri logo preview" style="position:relative;z-index:2;">
                             <strong style="position:relative;z-index:2;">Pahri Thema New</strong>
                             <span style="position:relative;z-index:2;">Nexus Spatial Operating Theme</span>
-                            <small style="position:relative;z-index:2;">Version 5.0 • by Pahri</small>
+                            <small style="position:relative;z-index:2;">Version 5.0.2 • by Pahri</small>
                         </div>
                     </div>
                 </div>
@@ -278,6 +282,15 @@
     <style>
         .pahri-preview-grid{position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(to bottom,#000,transparent)}
         .nav-tabs-custom>.tab-content{background:transparent!important;padding:20px}
+        .pahri-checkbox{margin:12px 0!important}
+        .pahri-checkbox>label{min-height:28px!important;padding-left:36px!important;position:relative!important;display:inline-flex!important;align-items:center!important;color:rgba(241,245,249,.82)!important;cursor:pointer!important;user-select:none!important}
+        .pahri-checkbox .pahri-checkbox-input{position:absolute!important;left:0!important;top:50%!important;z-index:3!important;width:24px!important;height:24px!important;margin:0!important;transform:translateY(-50%)!important;opacity:0!important;cursor:pointer!important}
+        .pahri-checkbox .pahri-checkbox-ui{position:absolute!important;left:0!important;top:50%!important;width:22px!important;height:22px!important;transform:translateY(-50%)!important;border:2px solid #fff!important;border-radius:7px!important;background:#fff!important;box-shadow:0 7px 18px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.5)!important;pointer-events:none!important;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease!important}
+        .pahri-checkbox .pahri-checkbox-input:checked+.pahri-checkbox-ui{border-color:#22c55e!important;background:#22c55e!important;box-shadow:0 0 0 3px rgba(34,197,94,.18),0 8px 24px rgba(34,197,94,.38)!important}
+        .pahri-checkbox .pahri-checkbox-input:checked+.pahri-checkbox-ui:after{content:'✓'!important;position:absolute!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;color:#fff!important;font:900 15px/1 Arial,sans-serif!important;text-shadow:0 1px 3px rgba(0,0,0,.35)!important}
+        .pahri-checkbox .pahri-checkbox-input:focus+.pahri-checkbox-ui{box-shadow:0 0 0 4px rgba(34,197,94,.22),0 8px 24px rgba(0,0,0,.3)!important}
+        .pahri-checkbox>label:hover .pahri-checkbox-ui{transform:translateY(-50%) scale(1.06)!important}
+        .pahri-checkbox-label{line-height:1.45!important}
     </style>
 
     <script>
