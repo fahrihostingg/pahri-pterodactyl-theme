@@ -22,10 +22,13 @@ run_local_installer() {
     local root="$1"
     [[ -f "$root/scripts/install-local.sh" ]] || die "scripts/install-local.sh tidak dijumpai."
     [[ -f "$root/scripts/install-v2.sh" ]] || die "scripts/install-v2.sh tidak dijumpai."
+    [[ -f "$root/scripts/install-source.sh" ]] || die "scripts/install-source.sh tidak dijumpai."
     [[ -d "$root/files" ]] || die "Folder files tidak dijumpai dalam pakej tema."
+    [[ -d "$root/source" ]] || die "Folder source tidak dijumpai dalam pakej tema."
 
     bash "$root/scripts/install-local.sh"
     bash "$root/scripts/install-v2.sh"
+    bash "$root/scripts/install-source.sh"
 }
 
 if [[ -n "$SELF_DIR" && -f "$SELF_DIR/scripts/install-local.sh" && -d "$SELF_DIR/files" ]]; then
