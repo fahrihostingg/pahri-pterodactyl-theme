@@ -24,6 +24,10 @@ SOURCE_FILES=(
     "resources/scripts/routers/AuthenticationRouter.tsx"
 )
 
+EXTRA_SOURCE_FILES=(
+    "resources/scripts/components/PahriBroadcast.tsx"
+)
+
 if [[ -f "$SOURCE_STATE_FILE" ]]; then
     SOURCE_BACKUP="$(head -n 1 "$SOURCE_STATE_FILE")"
     [[ -d "$SOURCE_BACKUP" ]] || die "Folder backup source tidak sah: $SOURCE_BACKUP"
@@ -32,6 +36,10 @@ if [[ -f "$SOURCE_STATE_FILE" ]]; then
     for relative in "${SOURCE_FILES[@]}"; do
         [[ -f "$SOURCE_BACKUP/$relative" ]] || die "Backup source tiada: $relative"
         install -D -m 0644 "$SOURCE_BACKUP/$relative" "$PANEL_DIR/$relative"
+    done
+
+    for relative in "${EXTRA_SOURCE_FILES[@]}"; do
+        rm -f "$PANEL_DIR/$relative"
     done
 
     command -v node >/dev/null 2>&1 || die "Node.js diperlukan untuk build semula frontend asal."
@@ -96,5 +104,5 @@ else
 fi
 
 rm -f "$STATE_FILE" "$SOURCE_STATE_FILE"
-ok "Pahri Theme telah dibuang dan panel dipulihkan daripada backup."
+ok "Pahri Thema New telah dibuang dan panel asal berjaya dipulihkan."
 printf 'Backup tema: %s\n' "$BACKUP_DIR"
