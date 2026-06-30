@@ -53,21 +53,40 @@
         document.body.appendChild(bar);
     }
 
+    function removeOriginalBrand() {
+        document.querySelectorAll('[alt*="Pterodactyl"], [title*="Pterodactyl"], [aria-label*="Pterodactyl"]').forEach(element => {
+            element.classList.add('pahri-original-brand');
+        });
+
+        document.querySelectorAll('#app a').forEach(anchor => {
+            if (!anchor.querySelector('svg') || anchor.textContent.trim()) return;
+            const rect = anchor.getBoundingClientRect();
+            if (rect.top < 170 && rect.width >= 38 && rect.height >= 28) {
+                anchor.classList.add('pahri-original-brand');
+            }
+        });
+
+        document.querySelectorAll('body *').forEach(element => {
+            if (element.children.length > 0) return;
+            if (element.textContent.trim().toLowerCase() === 'pterodactyl') {
+                element.textContent = BRAND;
+            }
+        });
+    }
+
     function applyBrand() {
         document.title = BRAND + ' — Control Center';
         const adminName = document.querySelector('.pahri-admin-logo-text');
         if (adminName) adminName.textContent = BRAND;
-
-        document.querySelectorAll('[alt*="Pterodactyl"], [title*="Pterodactyl"], [aria-label*="Pterodactyl"]').forEach(element => {
-            element.classList.add('pahri-original-brand');
-        });
+        removeOriginalBrand();
     }
 
     function boot() {
         mountBar();
         applyBrand();
-        window.setTimeout(applyBrand, 800);
-        window.setTimeout(applyBrand, 2500);
+        window.setTimeout(applyBrand, 600);
+        window.setTimeout(applyBrand, 1600);
+        window.setTimeout(applyBrand, 3200);
     }
 
     if (document.readyState === 'loading') {
