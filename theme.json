@@ -1,9 +1,20 @@
 {
-  "name": "Pahri Elegant Theme",
-  "version": "1.0.0",
+  "name": "Pahri Thema New",
+  "version": "5.0.0",
+  "codename": "Nexus",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
   "pterodactyl": "1.14.x",
-  "tested_structure": "1.14.1"
+  "tested_structure": "1.14.1",
+  "features": [
+    "source-level full reskin",
+    "broadcast center",
+    "scheduled banner and modal",
+    "audience targeting",
+    "nexus command engine",
+    "admin quick links",
+    "visual presets",
+    "interactive holographic server cards"
+  ]
 }
