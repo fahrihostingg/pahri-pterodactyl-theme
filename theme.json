@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "5.0.2",
-  "codename": "Nexus",
+  "version": "6.0.0",
+  "codename": "Nexus Dock",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -17,6 +17,11 @@
     "visual presets",
     "interactive holographic server cards",
     "green checked-state controls",
-    "white empty unchecked controls"
+    "white empty unchecked controls",
+    "floating nexus dock",
+    "support action bubble",
+    "live clock dock",
+    "spotlight information card",
+    "nexus dock studio"
   ]
 }
