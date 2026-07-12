@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.0.0",
-  "codename": "Nexus Dock",
+  "version": "6.0.1",
+  "codename": "Nexus Dock Hotfix",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -22,6 +22,7 @@
     "support action bubble",
     "live clock dock",
     "spotlight information card",
-    "nexus dock studio"
+    "nexus dock studio",
+    "blank screen hotfix"
   ]
 }
