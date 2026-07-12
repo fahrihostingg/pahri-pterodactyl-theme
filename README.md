@@ -1,6 +1,6 @@
-# Pahri Thema New 5.0
+# Pahri Thema New 6.0
 
-Tema source-level premium untuk **Pterodactyl Panel v1.14.x**. Versi 5.0 menukar keseluruhan pengalaman panel kepada Nexus Spatial OS dengan visual estetik, glassmorphism, aurora, animasi 3D dan fungsi admin tambahan.
+Tema source-level premium untuk **Pterodactyl Panel v1.14.x**. Versi 6.0 menukar pengalaman panel kepada Nexus Spatial OS dengan visual estetik, glassmorphism, aurora, animasi 3D, Broadcast Center, Nexus Command Engine dan floating Nexus Dock.
 
 ## Ciri utama
 
@@ -8,19 +8,21 @@ Tema source-level premium untuk **Pterodactyl Panel v1.14.x**. Versi 5.0 menukar
 - Cursor light, volumetric grid, grain dan star particles.
 - Navbar adaptive gaya spatial operating system.
 - Nexus Command Engine melalui `Ctrl + K`.
+- Floating Nexus Dock bawah panel dengan Home, Servers, Account, Admin dan Quick Links.
+- Support action bubble yang URL dan label boleh dikawal dari Admin.
+- Spotlight information card untuk mesej pendek di client panel.
 - Dashboard executive dengan live clock, timezone, role, security dan jumlah server.
 - Kad server holografik yang condong mengikut cursor.
 - Live CPU, RAM, disk, allocation dan resource progress bars.
 - Semua console, files, database, backup, network dan settings menggunakan shell Nexus.
 - Admin panel full reskin: header, sidebar, cards, tables, forms dan modals.
+- Checkbox Admin jelas: OFF putih kosong, ON hijau dengan tanda ✓.
 - Responsive untuk desktop, tablet dan telefon.
 - Tiada library WebGL berat.
 
 ## Broadcast Center
 
 Admin boleh menghantar pengumuman global tanpa migration database.
-
-Ciri broadcast:
 
 - Aktif atau matikan dari Admin.
 - Floating banner atau cinematic modal.
@@ -31,9 +33,16 @@ Ciri broadcast:
 - Pilihan pengguna boleh tutup atau wajib kekal.
 - Dismiss disimpan mengikut revision broadcast.
 
-## Nexus Quick Links
+## Nexus Dock Studio
 
-Admin boleh menambah sehingga tiga pautan khas. Pautan itu muncul automatik dalam `Ctrl + K` bersama dashboard, servers, account dan admin control.
+Dalam tab **Quick Links & Status**, Admin boleh kawal:
+
+- Floating Nexus Dock ON/OFF.
+- Support Bubble label.
+- Support Bubble URL.
+- Spotlight title.
+- Spotlight message.
+- Quick Links yang terus muncul dalam dock dan `Ctrl + K`.
 
 ## Visual Lab
 
@@ -47,7 +56,7 @@ Admin boleh mengubah:
 
 - Logo panel.
 - Wallpaper cinematic.
-- Visual preset: Obsidian, Aurora, Imperial, Emerald atau Custom.
+- Visual preset: Obsidian, Aurora, Imperial, Emerald, Royal, Neon, Ice atau Custom.
 - Warna utama dan kedua.
 - Glass opacity.
 - Glass blur.
@@ -58,40 +67,17 @@ Admin boleh mengubah:
 - Navbar status label.
 - Broadcast Center.
 - Quick Links.
-
-## Keperluan
-
-- Pterodactyl Panel v1.14.x.
-- Struktur diuji: v1.14.1.
-- PHP 8.2 atau lebih baharu.
-- Python 3.
-- Ubuntu atau Debian untuk auto-install Node.js.
-- Sekurang-kurangnya 4 GB RAM disyorkan untuk production build.
-
-Installer memasang Node.js 24 dan Yarn Classic secara automatik apabila belum tersedia.
+- Nexus Dock Studio.
 
 ## Install atau update
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | sudo bash
-```
-
-Jika sudah login sebagai root:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh | bash
 ```
 
-Panel di lokasi selain `/var/www/pterodactyl`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/install.sh \
-  | sudo env PANEL_DIR=/lokasi/panel bash
-```
-
 Installer menjalankan tiga peringkat:
 
-1. Memasang Visual Lab, Broadcast Center dan Quick Links Admin.
+1. Memasang Visual Lab, Broadcast Center, Quick Links dan Nexus Dock Studio.
 2. Memasang full reskin Blade dan admin shell.
 3. Mengganti komponen React dan menjalankan `yarn build:production`.
 
@@ -99,25 +85,19 @@ Output akhir berjaya:
 
 ```text
 [OK] Pahri Thema New full reskin aktif.
-[OK] Pahri Thema New 5.0 berjaya dibina dan diaktifkan.
+[OK] Pahri Thema New 6.0 berjaya dibina dan diaktifkan.
+[OK] Pahri Thema New 6.0.0 berjaya dipasang sepenuhnya.
 ```
-
-Arahan install yang sama berfungsi sebagai update. Backup source asal tidak ditimpa.
 
 ## Selepas update
 
 ```bash
 cd /var/www/pterodactyl
 php artisan optimize:clear
+php artisan view:clear
 ```
 
-Kemudian lakukan hard refresh:
-
-```text
-Ctrl + Shift + R
-```
-
-Jika menggunakan Cloudflare Proxy, purge cache domain panel selepas production build selesai.
+Kemudian tekan `Ctrl + Shift + R`. Jika menggunakan Cloudflare Proxy, purge cache domain panel selepas production build selesai.
 
 ## Uninstall dan rollback penuh
 
@@ -125,32 +105,4 @@ Jika menggunakan Cloudflare Proxy, purge cache domain panel selepas production b
 curl -fsSL https://raw.githubusercontent.com/fahrihostingg/pahri-pterodactyl-theme/main/uninstall.sh | sudo bash
 ```
 
-Rollback akan:
-
-- Memulihkan komponen React asal.
-- Membuang `PahriBroadcast.tsx`.
-- Menjalankan production build asal.
-- Memulihkan Blade, route dan controller asal.
-- Membuang aset Pahri.
-- Membersihkan cache Laravel.
-
-## Backup
-
-```text
-/var/www/pterodactyl/.pahri-theme-backups/
-/var/www/pterodactyl/.pahri-source-backups/
-```
-
-## Keserasian dan keselamatan
-
-- TypeScript diperiksa terhadap source rasmi Pterodactyl v1.14.1.
-- Frontend production dibina dengan Node.js 24.
-- Broadcast disimpan sebagai konfigurasi tema, bukan HTML bebas.
-- React akan escape mesej broadcast secara automatik.
-- URL CTA dan Quick Links hanya menerima `http://`, `https://` atau path dalaman `/...`.
-- Tiada password, API key atau data pengguna disimpan oleh tema.
-- Installer membuat backup dan auto-restore source sebelumnya jika build gagal.
-
-## Nota sebelum update Pterodactyl
-
-Uninstall tema terlebih dahulu, update Pterodactyl, kemudian pasang versi Pahri Thema New yang telah disahkan serasi dengan versi panel baharu.
+Rollback akan memulihkan source asal, membuang `PahriBroadcast.tsx` dan `PahriNexusDock.tsx`, build semula frontend asal, memulihkan Blade, route dan controller asal, serta membersihkan cache Laravel.
