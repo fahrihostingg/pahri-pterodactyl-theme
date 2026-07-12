@@ -14,6 +14,7 @@ import { ServerContext } from '@/state/server';
 import '@/assets/tailwind.css';
 import Spinner from '@/components/elements/Spinner';
 import PahriBroadcast from '@/components/PahriBroadcast';
+import PahriNexusDock from '@/components/PahriNexusDock';
 import styled, { keyframes } from 'styled-components/macro';
 
 const DashboardRouter = lazy(() => import(/* webpackChunkName: "dashboard" */ '@/routers/DashboardRouter'));
@@ -91,18 +92,11 @@ const Aurora = styled.span<{ $primary?: boolean }>`
     min-height: 420px;
     border-radius: 50%;
     filter: blur(100px);
-    background: ${props =>
-        props.$primary
-            ? 'radial-gradient(ellipse, color-mix(in srgb, var(--pahri-accent) 34%, transparent), transparent 68%)'
-            : 'radial-gradient(ellipse, color-mix(in srgb, var(--pahri-accent-secondary) 27%, transparent), transparent 70%)'};
+    background: ${props => props.$primary ? 'radial-gradient(ellipse, color-mix(in srgb, var(--pahri-accent) 34%, transparent), transparent 68%)' : 'radial-gradient(ellipse, color-mix(in srgb, var(--pahri-accent-secondary) 27%, transparent), transparent 70%)'};
     animation: ${aurora} var(--pahri-motion-duration, 18s) ease-in-out infinite;
     animation-delay: ${props => (props.$primary ? '-4s' : '-12s')};
     animation-play-state: var(--pahri-animation-state);
-
-    ${props =>
-        props.$primary
-            ? 'top: -18vw; left: -12vw;'
-            : 'right: -18vw; bottom: -20vw; transform: rotate(180deg);'}
+    ${props => props.$primary ? 'top: -18vw; left: -12vw;' : 'right: -18vw; bottom: -20vw; transform: rotate(180deg);'}
 `;
 
 const CursorAura = styled.span`
@@ -165,14 +159,10 @@ const Application = styled.div`
     min-height: 100vh;
     position: relative;
     isolation: isolate;
+    padding-bottom: 104px;
 `;
 
-const particles = Array.from({ length: 26 }, (_, index) => ({
-    left: (index * 37 + 11) % 100,
-    delay: (index * 1.73) % 18,
-    duration: 14 + (index % 7) * 2.2,
-    size: 1 + (index % 3),
-}));
+const particles = Array.from({ length: 26 }, (_, index) => ({ left: (index * 37 + 11) % 100, delay: (index * 1.73) % 18, duration: 14 + (index % 7) * 2.2, size: 1 + (index % 3) }));
 
 interface ExtendedWindow extends Window {
     SiteConfiguration?: SiteSettings;
@@ -202,7 +192,6 @@ const App = () => {
                 document.documentElement.style.setProperty('--pahri-cursor-y', `${event.clientY}px`);
             });
         };
-
         window.addEventListener('mousemove', onMove, { passive: true });
         return () => {
             window.cancelAnimationFrame(frame);
@@ -223,9 +212,7 @@ const App = () => {
         });
     }
 
-    if (!store.getState().settings.data) {
-        store.getActions().settings.setSettings(SiteConfiguration!);
-    }
+    if (!store.getState().settings.data) store.getActions().settings.setSettings(SiteConfiguration!);
 
     return (
         <>
@@ -237,15 +224,7 @@ const App = () => {
                 <Shape $size={210} $top={'7%'} $left={'78%'} $delay={'-2s'} />
                 <Shape $size={128} $top={'64%'} $left={'6%'} $delay={'-8s'} />
                 <Shape $size={78} $top={'42%'} $left={'59%'} $delay={'-13s'} />
-                {particles.map((particle, index) => (
-                    <Particle
-                        key={index}
-                        $left={particle.left}
-                        $delay={particle.delay}
-                        $duration={particle.duration}
-                        $size={particle.size}
-                    />
-                ))}
+                {particles.map((particle, index) => <Particle key={index} $left={particle.left} $delay={particle.delay} $duration={particle.duration} $size={particle.size} />)}
                 <Grain />
             </Scene>
             <StoreProvider store={store}>
@@ -253,23 +232,18 @@ const App = () => {
                 <Application>
                     <Router history={history}>
                         <Switch>
-                            <Route path={'/auth'}>
-                                <Spinner.Suspense><AuthenticationRouter /></Spinner.Suspense>
-                            </Route>
+                            <Route path={'/auth'}><Spinner.Suspense><AuthenticationRouter /></Spinner.Suspense></Route>
                             <AuthenticatedRoute path={'/server/:id'}>
-                                <Spinner.Suspense>
-                                    <ServerContext.Provider><ServerRouter /></ServerContext.Provider>
-                                </Spinner.Suspense>
+                                <Spinner.Suspense><ServerContext.Provider><ServerRouter /></ServerContext.Provider></Spinner.Suspense>
                             </AuthenticatedRoute>
-                            <AuthenticatedRoute path={'/'}>
-                                <Spinner.Suspense><DashboardRouter /></Spinner.Suspense>
-                            </AuthenticatedRoute>
+                            <AuthenticatedRoute path={'/'}><Spinner.Suspense><DashboardRouter /></Spinner.Suspense></AuthenticatedRoute>
                             <Route path={'*'}><NotFound /></Route>
                         </Switch>
                     </Router>
                 </Application>
             </StoreProvider>
             <PahriBroadcast authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)} />
+            <PahriNexusDock authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)} />
         </>
     );
 };
