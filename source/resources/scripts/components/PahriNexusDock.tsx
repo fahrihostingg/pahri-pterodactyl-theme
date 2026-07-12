@@ -5,11 +5,9 @@ import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components/macro';
 
 type RuntimeConfig = {
-    status_label?: string;
     quick_links?: Array<{ label: string; url: string }>;
     dock?: {
         active?: boolean;
-        compact?: boolean;
         support_label?: string;
         support_url?: string;
         spotlight_title?: string;
@@ -71,7 +69,7 @@ const DockWrap = styled.div`
     }
 `;
 
-const DockLink = styled.a`
+const dockLinkStyles = `
     min-width: 46px;
     height: 46px;
     padding: 0 13px;
@@ -110,7 +108,8 @@ const DockLink = styled.a`
     }
 `;
 
-const InternalLink = DockLink.withComponent(Link);
+const DockLink = styled.a`${dockLinkStyles}`;
+const InternalLink = styled(Link)`${dockLinkStyles}`;
 
 const Clock = styled.div`
     min-width: 88px;
@@ -125,7 +124,6 @@ const Clock = styled.div`
 
     strong { color: #fff; font-size: 12px; font-weight: 870; line-height: 1; }
     small { margin-top: 4px; color: rgba(226,232,240,.36); font-size: 7px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
-
     @media (max-width: 600px) { display: none; }
 `;
 
@@ -188,9 +186,10 @@ const Spotlight = styled.div`
 
     strong { display: block; color: #fff; font-size: 12px; font-weight: 860; letter-spacing: -.02em; }
     p { margin: 6px 0 0; color: rgba(226,232,240,.48); font-size: 10px; line-height: 1.6; }
-
     @media (max-width: 900px) { display: none; }
 `;
+
+const isSafeUrl = (url: string) => /^(https?:\/\/|\/)[^\s]+$/.test(url);
 
 export default ({ authenticated, rootAdmin }: Props) => {
     const [runtime, setRuntime] = useState<RuntimeConfig>({});
@@ -199,8 +198,8 @@ export default ({ authenticated, rootAdmin }: Props) => {
     useEffect(() => {
         fetch(`/themes/pahri/settings.json?dock=${Date.now()}`, { cache: 'no-store' })
             .then(response => response.ok ? response.json() : Promise.reject(new Error('Runtime unavailable')))
-            .then((config: RuntimeConfig) => setRuntime(config))
-            .catch(() => undefined);
+            .then((config: RuntimeConfig) => setRuntime(config || {}))
+            .catch(() => setRuntime({}));
     }, []);
 
     useEffect(() => {
@@ -210,11 +209,13 @@ export default ({ authenticated, rootAdmin }: Props) => {
 
     if (!authenticated || runtime.dock?.active === false) return null;
 
-    const supportUrl = runtime.dock?.support_url || '/account';
+    const supportUrl = runtime.dock?.support_url && isSafeUrl(runtime.dock.support_url) ? runtime.dock.support_url : '/account';
     const supportLabel = runtime.dock?.support_label || 'Support';
     const spotlightTitle = runtime.dock?.spotlight_title || 'Nexus Dock Active';
     const spotlightMessage = runtime.dock?.spotlight_message || 'Quick actions, live time, support and custom links are ready from one floating dock.';
-    const customLinks = Array.isArray(runtime.quick_links) ? runtime.quick_links.slice(0, 3) : [];
+    const customLinks = Array.isArray(runtime.quick_links)
+        ? runtime.quick_links.filter(link => link.label && isSafeUrl(link.url)).slice(0, 3)
+        : [];
 
     return (
         <>
