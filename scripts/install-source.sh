@@ -29,6 +29,7 @@ REPLACE_FILES=(
 
 EXTRA_FILES=(
     "resources/scripts/components/PahriBroadcast.tsx"
+    "resources/scripts/components/PahriNexusDock.tsx"
 )
 
 ALL_FILES=("${REPLACE_FILES[@]}" "${EXTRA_FILES[@]}")
@@ -67,18 +68,13 @@ ensure_node() {
 
     local setup_file
     setup_file="$(mktemp -t nodesource-setup.XXXXXX.sh)"
-    curl --fail --location --silent --show-error \
-        --retry 3 --retry-delay 2 --connect-timeout 20 \
-        https://deb.nodesource.com/setup_24.x \
-        --output "$setup_file"
-
+    curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --connect-timeout 20 https://deb.nodesource.com/setup_24.x --output "$setup_file"
     [[ -s "$setup_file" ]] || die "Skrip pemasangan NodeSource kosong."
     bash "$setup_file"
     rm -f "$setup_file"
 
     apt-get install -y nodejs
     hash -r
-
     command -v node >/dev/null 2>&1 || die "Node.js gagal dipasang."
     current_major="$(node -p "Number(process.versions.node.split('.')[0])")"
     (( current_major >= 22 )) || die "Versi Node.js selepas pemasangan masih tidak sesuai: $(node -v)"
@@ -90,19 +86,16 @@ ensure_yarn() {
         log "Yarn sedia ada dikesan: $(yarn --version)"
         return
     fi
-
     log "Menyediakan Yarn Classic 1.22.22..."
     if command -v corepack >/dev/null 2>&1; then
         corepack enable || true
         corepack prepare yarn@1.22.22 --activate || true
     fi
-
     if ! command -v yarn >/dev/null 2>&1; then
         command -v npm >/dev/null 2>&1 || die "npm tidak dijumpai selepas pemasangan Node.js."
         npm install --global yarn@1.22.22
         hash -r
     fi
-
     command -v yarn >/dev/null 2>&1 || die "Yarn gagal disediakan."
     ok "Yarn $(yarn --version) berjaya disediakan."
 }
@@ -140,11 +133,9 @@ build_panel() {
 restore_run_backup() {
     [[ -n "$RUN_BACKUP" && -d "$RUN_BACKUP" ]] || return 0
     warn "Build gagal. Memulihkan source sebelum pemasangan..."
-
     for relative in "${REPLACE_FILES[@]}"; do
         install -D -m 0644 "$RUN_BACKUP/$relative" "$PANEL_DIR/$relative"
     done
-
     for relative in "${EXTRA_FILES[@]}"; do
         if [[ -f "$RUN_BACKUP/$relative" ]]; then
             install -D -m 0644 "$RUN_BACKUP/$relative" "$PANEL_DIR/$relative"
@@ -152,7 +143,6 @@ restore_run_backup() {
             rm -f "$PANEL_DIR/$relative"
         fi
     done
-
     (build_panel) || warn "Source dipulihkan tetapi rebuild asal gagal. Jalankan yarn build:production secara manual."
 }
 
@@ -184,7 +174,7 @@ else
     warn "Source theme telah dipasang. Mengemas kini tanpa menimpa backup asal."
 fi
 
-log "Menyalin komponen Pahri Thema New 5.0..."
+log "Menyalin komponen Pahri Thema New 6.0..."
 copy_theme_files "$SOURCE_DIR" "$PANEL_DIR"
 
 log "Membina frontend production dengan Node $(node -v) dan Yarn $(yarn --version)..."
@@ -198,5 +188,5 @@ done
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Thema New 5.0 berjaya dibina dan diaktifkan."
+ok "Pahri Thema New 6.0 berjaya dibina dan diaktifkan."
 printf 'Backup asal: %s\n' "$ORIGINAL_BACKUP"
