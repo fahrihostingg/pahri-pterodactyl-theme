@@ -14,7 +14,6 @@ import { ServerContext } from '@/state/server';
 import '@/assets/tailwind.css';
 import Spinner from '@/components/elements/Spinner';
 import PahriBroadcast from '@/components/PahriBroadcast';
-import PahriNexusDock from '@/components/PahriNexusDock';
 import styled, { keyframes } from 'styled-components/macro';
 
 const DashboardRouter = lazy(() => import(/* webpackChunkName: "dashboard" */ '@/routers/DashboardRouter'));
@@ -159,7 +158,6 @@ const Application = styled.div`
     min-height: 100vh;
     position: relative;
     isolation: isolate;
-    padding-bottom: 104px;
 `;
 
 const particles = Array.from({ length: 26 }, (_, index) => ({ left: (index * 37 + 11) % 100, delay: (index * 1.73) % 18, duration: 14 + (index % 7) * 2.2, size: 1 + (index % 3) }));
@@ -243,7 +241,6 @@ const App = () => {
                 </Application>
             </StoreProvider>
             <PahriBroadcast authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)} />
-            <PahriNexusDock authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)} />
         </>
     );
 };
