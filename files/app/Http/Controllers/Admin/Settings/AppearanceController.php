@@ -28,7 +28,7 @@ class AppearanceController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'preset' => ['required', 'in:obsidian,aurora,imperial,emerald,custom'],
+            'preset' => ['required', 'in:obsidian,aurora,imperial,emerald,royal,neon,ice,custom'],
             'accent' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'accent_secondary' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'surface_opacity' => ['required', 'integer', 'between:55,95'],
@@ -53,6 +53,12 @@ class AppearanceController extends Controller
             'broadcast_button_text' => ['nullable', 'string', 'max:40'],
             'broadcast_button_url' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
 
+            'dock_active' => ['nullable', 'boolean'],
+            'dock_support_label' => ['nullable', 'string', 'max:32'],
+            'dock_support_url' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
+            'dock_spotlight_title' => ['nullable', 'string', 'max:80'],
+            'dock_spotlight_message' => ['nullable', 'string', 'max:220'],
+
             'quick_link_label_1' => ['nullable', 'string', 'max:40'],
             'quick_link_url_1' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
             'quick_link_label_2' => ['nullable', 'string', 'max:40'],
@@ -63,7 +69,7 @@ class AppearanceController extends Controller
 
         $settings = array_merge($this->defaults(), $this->readSettings(), [
             'theme_name' => 'Pahri Thema New',
-            'theme_version' => '5.0.0',
+            'theme_version' => '6.0.0',
             'preset' => $validated['preset'],
             'accent' => strtolower($validated['accent']),
             'accent_secondary' => strtolower($validated['accent_secondary']),
@@ -96,6 +102,13 @@ class AppearanceController extends Controller
                     (string) ($validated['broadcast_ends_at'] ?? ''),
                 ])),
             ],
+            'dock' => [
+                'active' => $request->boolean('dock_active'),
+                'support_label' => trim((string) ($validated['dock_support_label'] ?? 'Support')),
+                'support_url' => trim((string) ($validated['dock_support_url'] ?? '/account')),
+                'spotlight_title' => trim((string) ($validated['dock_spotlight_title'] ?? 'Nexus Dock Active')),
+                'spotlight_message' => trim((string) ($validated['dock_spotlight_message'] ?? 'Quick actions, live time, support and custom links are ready.')),
+            ],
             'quick_links' => $this->quickLinks($validated),
             'updated_at' => now()->toIso8601String(),
         ]);
@@ -113,7 +126,7 @@ class AppearanceController extends Controller
         $this->writeSettings($settings);
         $this->writeCustomCss($settings);
 
-        $this->alert->success('Pahri Thema New berjaya dikemas kini. Visual Engine, Broadcast Center dan Quick Links telah digunakan.')->flash();
+        $this->alert->success('Pahri Thema New 6.0 berjaya dikemas kini. Nexus Dock, Broadcast Center dan Visual Lab telah digunakan.')->flash();
 
         return redirect()->route('admin.settings.appearance');
     }
@@ -122,7 +135,7 @@ class AppearanceController extends Controller
     {
         return [
             'theme_name' => 'Pahri Thema New',
-            'theme_version' => '5.0.0',
+            'theme_version' => '6.0.0',
             'preset' => 'obsidian',
             'accent' => '#a855f7',
             'accent_secondary' => '#22d3ee',
@@ -149,6 +162,13 @@ class AppearanceController extends Controller
                 'button_url' => '',
                 'revision' => 'initial',
             ],
+            'dock' => [
+                'active' => true,
+                'support_label' => 'Support',
+                'support_url' => '/account',
+                'spotlight_title' => 'Nexus Dock Active',
+                'spotlight_message' => 'Quick actions, live time, support and custom links are ready from one floating dock.',
+            ],
             'quick_links' => [],
             'updated_at' => null,
         ];
@@ -168,8 +188,10 @@ class AppearanceController extends Controller
             return $this->defaults();
         }
 
-        $settings = array_merge($this->defaults(), $decoded);
-        $settings['broadcast'] = array_merge($this->defaults()['broadcast'], is_array($decoded['broadcast'] ?? null) ? $decoded['broadcast'] : []);
+        $defaults = $this->defaults();
+        $settings = array_merge($defaults, $decoded);
+        $settings['broadcast'] = array_merge($defaults['broadcast'], is_array($decoded['broadcast'] ?? null) ? $decoded['broadcast'] : []);
+        $settings['dock'] = array_merge($defaults['dock'], is_array($decoded['dock'] ?? null) ? $decoded['dock'] : []);
         $settings['quick_links'] = is_array($decoded['quick_links'] ?? null) ? $decoded['quick_links'] : [];
 
         return $settings;
