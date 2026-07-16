@@ -97,8 +97,18 @@ def main() -> None:
             <link rel="stylesheet" href="/themes/pahri/nova-admin-content.css?v={{ @filemtime(public_path('themes/pahri/nova-admin-content.css')) ?: 1 }}">
             <link rel="stylesheet" href="/themes/pahri/nova-admin-controls.css?v={{ @filemtime(public_path('themes/pahri/nova-admin-controls.css')) ?: 1 }}">
             <link rel="stylesheet" href="/themes/pahri/nova-admin-footer.css?v={{ @filemtime(public_path('themes/pahri/nova-admin-footer.css')) ?: 1 }}">
+            <script>window.PahriUserId = {{ auth()->id() ?: 0 }};</script><!-- PAHRI USER ID ADMIN -->
             <script defer src="/themes/pahri/thema-new.js?v={{ @filemtime(public_path('themes/pahri/thema-new.js')) ?: 1 }}"></script>'''
     admin_text = inject(admin_text, admin_anchor, admin_assets, 'nova-admin-header.css', str(admin))
+
+    if 'PAHRI USER ID ADMIN' not in admin_text:
+        admin_text = inject(
+            admin_text,
+            '</head>',
+            '            <script>window.PahriUserId = {{ auth()->id() ?: 0 }};</script><!-- PAHRI USER ID ADMIN -->\n',
+            'PAHRI USER ID ADMIN',
+            str(admin),
+        )
 
     admin_text = replace_known(
         admin_text,
