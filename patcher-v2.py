@@ -58,6 +58,7 @@ def main() -> None:
         <link rel="stylesheet" href="/themes/pahri/nova-client-shell.css?v={{ @filemtime(public_path('themes/pahri/nova-client-shell.css')) ?: 1 }}">
         <link rel="stylesheet" href="/themes/pahri/nova-client-surfaces.css?v={{ @filemtime(public_path('themes/pahri/nova-client-surfaces.css')) ?: 1 }}">
         <link rel="stylesheet" href="/themes/pahri/nova-client-controls.css?v={{ @filemtime(public_path('themes/pahri/nova-client-controls.css')) ?: 1 }}">
+        <script>window.PahriUserId = {{ auth()->id() ?: 0 }};</script><!-- PAHRI USER ID -->
         <script defer src="/themes/pahri/thema-new.js?v={{ @filemtime(public_path('themes/pahri/thema-new.js')) ?: 1 }}"></script>'''
     wrapper_text = inject(
         wrapper_text,
@@ -66,6 +67,15 @@ def main() -> None:
         'nova-client-shell.css',
         str(wrapper),
     )
+
+    if 'PAHRI USER ID' not in wrapper_text:
+        wrapper_text = inject(
+            wrapper_text,
+            '</head>',
+            '        <script>window.PahriUserId = {{ auth()->id() ?: 0 }};</script><!-- PAHRI USER ID -->\n    ',
+            'PAHRI USER ID',
+            str(wrapper),
+        )
 
     wrapper_text = replace_known(
         wrapper_text,
