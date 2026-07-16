@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.4.1",
-  "codename": "Storefront Owner QRIS Hotfix",
+  "version": "6.4.2",
+  "codename": "Full Custom UI Restore",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -9,6 +9,10 @@
   "tested_structure": "1.14.1",
   "features": [
     "source-level full reskin",
+    "restored Nexus dock",
+    "dock safety boundary",
+    "support bubble",
+    "spotlight card",
     "broadcast center",
     "nexus command engine",
     "admin quick links",
