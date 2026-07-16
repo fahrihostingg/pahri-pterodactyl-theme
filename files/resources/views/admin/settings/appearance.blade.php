@@ -6,6 +6,10 @@
     $quickLinks = array_values($settings['quick_links'] ?? []);
     $startsAt = !empty($broadcast['starts_at']) ? \Carbon\Carbon::parse($broadcast['starts_at'])->format('Y-m-d\TH:i') : '';
     $endsAt = !empty($broadcast['ends_at']) ? \Carbon\Carbon::parse($broadcast['ends_at'])->format('Y-m-d\TH:i') : '';
+    $animationEnabled = (bool) old('animation', $settings['animation'] ?? true);
+    $particlesEnabled = (bool) old('particles', $settings['particles'] ?? true);
+    $broadcastEnabled = (bool) old('broadcast_active', $broadcast['active'] ?? false);
+    $dismissibleEnabled = (bool) old('broadcast_dismissible', $broadcast['dismissible'] ?? true);
 @endphp
 
 @section('title')
@@ -13,7 +17,7 @@
 @endsection
 
 @section('content-header')
-    <h1>Pahri Thema New<small>Visual OS, Broadcast Center dan quick-action engine.</small></h1>
+    <h1>Pahri Thema New<small>Visual OS, Broadcast Center dan Nexus control engine.</small></h1>
     <ol class="breadcrumb">
         <li><a href="{{ route('admin.index') }}">Admin</a></li>
         <li><a href="{{ route('admin.settings') }}">Settings</a></li>
@@ -97,25 +101,23 @@
                                 </div>
                             </div>
 
-                            <div class="row">
+                            <div class="row pahri-toggle-grid">
                                 <div class="col-sm-6">
-                                    <div class="checkbox pahri-checkbox">
-                                        <label>
-                                            <input type="hidden" name="animation" value="0">
-                                            <input class="pahri-checkbox-input" type="checkbox" name="animation" value="1" @checked(old('animation', $settings['animation']))>
-                                            <span class="pahri-checkbox-ui" aria-hidden="true"></span>
-                                            <span class="pahri-checkbox-label">Aktifkan animasi aurora, 3D dan glow</span>
-                                        </label>
+                                    <div class="pahri-toggle-control">
+                                        <input type="hidden" name="animation" class="pahri-toggle-value" value="{{ $animationEnabled ? '1' : '0' }}">
+                                        <button type="button" class="pahri-toggle-button {{ $animationEnabled ? 'is-active' : '' }}" aria-pressed="{{ $animationEnabled ? 'true' : 'false' }}">
+                                            <span class="pahri-toggle-box"><i class="fa fa-check"></i></span>
+                                            <span class="pahri-toggle-copy"><strong>Animasi Aurora & 3D</strong><small>Glow dan pergerakan visual <b class="pahri-toggle-state">{{ $animationEnabled ? 'ON' : 'OFF' }}</b></small></span>
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="checkbox pahri-checkbox">
-                                        <label>
-                                            <input type="hidden" name="particles" value="0">
-                                            <input class="pahri-checkbox-input" type="checkbox" name="particles" value="1" @checked(old('particles', $settings['particles']))>
-                                            <span class="pahri-checkbox-ui" aria-hidden="true"></span>
-                                            <span class="pahri-checkbox-label">Aktifkan star particles dan ambient dust</span>
-                                        </label>
+                                    <div class="pahri-toggle-control">
+                                        <input type="hidden" name="particles" class="pahri-toggle-value" value="{{ $particlesEnabled ? '1' : '0' }}">
+                                        <button type="button" class="pahri-toggle-button {{ $particlesEnabled ? 'is-active' : '' }}" aria-pressed="{{ $particlesEnabled ? 'true' : 'false' }}">
+                                            <span class="pahri-toggle-box"><i class="fa fa-check"></i></span>
+                                            <span class="pahri-toggle-copy"><strong>Star Particles</strong><small>Ambient dust dan bintang <b class="pahri-toggle-state">{{ $particlesEnabled ? 'ON' : 'OFF' }}</b></small></span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -124,16 +126,15 @@
                         <div class="tab-pane" id="pahri-broadcast">
                             <div class="callout callout-info">
                                 <h4><i class="fa fa-bullhorn"></i> Global Broadcast</h4>
-                                <p>Hantar pengumuman kepada semua pengguna, admin sahaja, atau client sahaja. Broadcast boleh keluar sebagai banner atau modal cinematic.</p>
+                                <p>Hantar pengumuman kepada semua pengguna, admin sahaja atau client sahaja.</p>
                             </div>
 
-                            <div class="checkbox pahri-checkbox">
-                                <label>
-                                    <input type="hidden" name="broadcast_active" value="0">
-                                    <input class="pahri-checkbox-input" type="checkbox" name="broadcast_active" value="1" @checked(old('broadcast_active', $broadcast['active'] ?? false))>
-                                    <span class="pahri-checkbox-ui" aria-hidden="true"></span>
-                                    <span class="pahri-checkbox-label">Aktifkan broadcast sekarang</span>
-                                </label>
+                            <div class="pahri-toggle-control pahri-toggle-wide">
+                                <input type="hidden" name="broadcast_active" class="pahri-toggle-value" value="{{ $broadcastEnabled ? '1' : '0' }}">
+                                <button type="button" class="pahri-toggle-button {{ $broadcastEnabled ? 'is-active' : '' }}" aria-pressed="{{ $broadcastEnabled ? 'true' : 'false' }}">
+                                    <span class="pahri-toggle-box"><i class="fa fa-check"></i></span>
+                                    <span class="pahri-toggle-copy"><strong>Aktifkan Broadcast</strong><small>Paparkan pengumuman kepada audience pilihan <b class="pahri-toggle-state">{{ $broadcastEnabled ? 'ON' : 'OFF' }}</b></small></span>
+                                </button>
                             </div>
 
                             <div class="row">
@@ -173,14 +174,13 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label>&nbsp;</label>
-                                    <div class="checkbox pahri-checkbox" style="margin-top: 8px;">
-                                        <label>
-                                            <input type="hidden" name="broadcast_dismissible" value="0">
-                                            <input class="pahri-checkbox-input" type="checkbox" name="broadcast_dismissible" value="1" @checked(old('broadcast_dismissible', $broadcast['dismissible'] ?? true))>
-                                            <span class="pahri-checkbox-ui" aria-hidden="true"></span>
-                                            <span class="pahri-checkbox-label">Pengguna boleh tutup</span>
-                                        </label>
+                                    <label>Dismiss Control</label>
+                                    <div class="pahri-toggle-control pahri-toggle-compact">
+                                        <input type="hidden" name="broadcast_dismissible" class="pahri-toggle-value" value="{{ $dismissibleEnabled ? '1' : '0' }}">
+                                        <button type="button" class="pahri-toggle-button {{ $dismissibleEnabled ? 'is-active' : '' }}" aria-pressed="{{ $dismissibleEnabled ? 'true' : 'false' }}">
+                                            <span class="pahri-toggle-box"><i class="fa fa-check"></i></span>
+                                            <span class="pahri-toggle-copy"><strong>Boleh Ditutup</strong><small><b class="pahri-toggle-state">{{ $dismissibleEnabled ? 'ON' : 'OFF' }}</b></small></span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -219,7 +219,7 @@
 
                             <div class="callout callout-success">
                                 <h4><i class="fa fa-keyboard-o"></i> Quick Links dalam Ctrl + K</h4>
-                                <p>Tambah sehingga tiga pautan khas. Ia akan muncul terus dalam Command Palette client.</p>
+                                <p>Tambah sehingga tiga pautan khas untuk Nexus Command Engine.</p>
                             </div>
 
                             @for($index = 0; $index < 3; $index++)
@@ -238,40 +238,36 @@
                     </div>
 
                     <div class="box-footer">
-                        <span class="text-muted"><i class="fa fa-shield"></i> Semua konfigurasi disimpan tanpa password atau API key.</span>
-                        <button type="submit" class="btn btn-primary pull-right">
-                            <i class="fa fa-magic"></i> Apply Pahri Thema New
-                        </button>
+                        <span class="text-muted"><i class="fa fa-shield"></i> Setiap fitur menggunakan satu toggle sahaja.</span>
+                        <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-magic"></i> Apply Pahri Thema New</button>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="box pahri-preview-box">
-                    <div class="box-header with-border">
-                        <h3 class="box-title"><i class="fa fa-eye"></i> Spatial Preview</h3>
-                    </div>
+                    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-eye"></i> Spatial Preview</h3></div>
                     <div class="box-body">
                         <div id="pahri-live-preview" class="pahri-admin-preview" style="background-image: radial-gradient(circle at 20% 10%, {{ $settings['accent'] }}66, transparent 36%), radial-gradient(circle at 90% 80%, {{ $settings['accent_secondary'] }}55, transparent 38%), linear-gradient(rgba(3, 7, 18, .45), rgba(3, 7, 18, .9)), url('{{ $settings['wallpaper'] }}?v={{ @filemtime(public_path(ltrim($settings['wallpaper'], '/'))) ?: 1 }}'); border-radius: {{ $settings['radius'] }}px; backdrop-filter: blur({{ $settings['blur'] }}px);">
                             <div class="pahri-preview-grid"></div>
                             <img src="{{ $settings['logo'] }}?v={{ @filemtime(public_path(ltrim($settings['logo'], '/'))) ?: 1 }}" alt="Pahri logo preview" style="position:relative;z-index:2;">
                             <strong style="position:relative;z-index:2;">Pahri Thema New</strong>
                             <span style="position:relative;z-index:2;">Nexus Spatial Operating Theme</span>
-                            <small style="position:relative;z-index:2;">Version 5.0.2 • by Pahri</small>
+                            <small style="position:relative;z-index:2;">Version 6.3.1 • by Pahri</small>
                         </div>
                     </div>
                 </div>
 
                 <div class="box">
-                    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-cubes"></i> New Engine Modules</h3></div>
+                    <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-cubes"></i> Engine Modules</h3></div>
                     <div class="box-body">
-                        <ul class="list-unstyled" style="line-height: 2;">
-                            <li><i class="fa fa-check text-green"></i> Global Broadcast Center</li>
-                            <li><i class="fa fa-check text-green"></i> Audience targeting</li>
-                            <li><i class="fa fa-check text-green"></i> Scheduled modal/banner</li>
-                            <li><i class="fa fa-check text-green"></i> Admin quick links</li>
-                            <li><i class="fa fa-check text-green"></i> Visual presets</li>
-                            <li><i class="fa fa-check text-green"></i> Runtime status label</li>
+                        <ul class="list-unstyled" style="line-height:2;">
+                            <li><i class="fa fa-check text-green"></i> Single-button toggles</li>
+                            <li><i class="fa fa-check text-green"></i> Broadcast Center</li>
+                            <li><i class="fa fa-check text-green"></i> Maintenance Guard</li>
+                            <li><i class="fa fa-check text-green"></i> Fake Hacking Theme</li>
+                            <li><i class="fa fa-check text-green"></i> Nexus Dock Studio</li>
+                            <li><i class="fa fa-check text-green"></i> Runtime status & quick links</li>
                         </ul>
                     </div>
                 </div>
@@ -282,15 +278,24 @@
     <style>
         .pahri-preview-grid{position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(to bottom,#000,transparent)}
         .nav-tabs-custom>.tab-content{background:transparent!important;padding:20px}
-        .pahri-checkbox{margin:12px 0!important}
-        .pahri-checkbox>label{min-height:28px!important;padding-left:36px!important;position:relative!important;display:inline-flex!important;align-items:center!important;color:rgba(241,245,249,.82)!important;cursor:pointer!important;user-select:none!important}
-        .pahri-checkbox .pahri-checkbox-input{position:absolute!important;left:0!important;top:50%!important;z-index:3!important;width:24px!important;height:24px!important;margin:0!important;transform:translateY(-50%)!important;opacity:0!important;cursor:pointer!important}
-        .pahri-checkbox .pahri-checkbox-ui{position:absolute!important;left:0!important;top:50%!important;width:22px!important;height:22px!important;transform:translateY(-50%)!important;border:2px solid #fff!important;border-radius:7px!important;background:#fff!important;box-shadow:0 7px 18px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.5)!important;pointer-events:none!important;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease!important}
-        .pahri-checkbox .pahri-checkbox-input:checked+.pahri-checkbox-ui{border-color:#22c55e!important;background:#22c55e!important;box-shadow:0 0 0 3px rgba(34,197,94,.18),0 8px 24px rgba(34,197,94,.38)!important}
-        .pahri-checkbox .pahri-checkbox-input:checked+.pahri-checkbox-ui:after{content:'✓'!important;position:absolute!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;color:#fff!important;font:900 15px/1 Arial,sans-serif!important;text-shadow:0 1px 3px rgba(0,0,0,.35)!important}
-        .pahri-checkbox .pahri-checkbox-input:focus+.pahri-checkbox-ui{box-shadow:0 0 0 4px rgba(34,197,94,.22),0 8px 24px rgba(0,0,0,.3)!important}
-        .pahri-checkbox>label:hover .pahri-checkbox-ui{transform:translateY(-50%) scale(1.06)!important}
-        .pahri-checkbox-label{line-height:1.45!important}
+        .pahri-toggle-grid{margin-top:6px}
+        .pahri-toggle-control{width:100%;margin:10px 0}
+        .pahri-toggle-value{display:none!important}
+        .pahri-toggle-button{width:100%;min-height:66px;padding:11px 13px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.12);border-radius:16px;color:#f8fafc;background:rgba(2,6,23,.62);box-shadow:inset 0 1px rgba(255,255,255,.045),0 13px 32px rgba(0,0,0,.24);text-align:left;cursor:pointer;transition:.2s ease}
+        .pahri-toggle-button:hover{border-color:rgba(255,255,255,.25);transform:translateY(-1px);box-shadow:inset 0 1px rgba(255,255,255,.06),0 18px 42px rgba(0,0,0,.3)}
+        .pahri-toggle-box{width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;border-radius:9px;color:transparent;background:transparent;box-shadow:0 7px 18px rgba(0,0,0,.3);transition:.2s ease}
+        .pahri-toggle-box i{font-size:15px;opacity:0;transform:scale(.5);transition:.18s ease}
+        .pahri-toggle-copy{min-width:0;display:flex;flex-direction:column}
+        .pahri-toggle-copy strong{font-size:12px;font-weight:850;color:#fff}
+        .pahri-toggle-copy small{margin-top:4px;color:rgba(226,232,240,.48);font-size:9px;line-height:1.35}
+        .pahri-toggle-state{margin-left:5px;color:#fff;font-weight:900;letter-spacing:.08em}
+        .pahri-toggle-button.is-active{border-color:rgba(34,197,94,.42);background:linear-gradient(135deg,rgba(34,197,94,.14),rgba(5,9,23,.72));box-shadow:0 0 0 3px rgba(34,197,94,.08),0 16px 40px rgba(34,197,94,.13),inset 0 1px rgba(255,255,255,.06)}
+        .pahri-toggle-button.is-active .pahri-toggle-box{border-color:#22c55e;background:#22c55e;color:#fff;box-shadow:0 0 0 3px rgba(34,197,94,.16),0 8px 24px rgba(34,197,94,.34)}
+        .pahri-toggle-button.is-active .pahri-toggle-box i{opacity:1;transform:scale(1)}
+        .pahri-toggle-button.is-active .pahri-toggle-state{color:#86efac}
+        .pahri-toggle-compact .pahri-toggle-button{min-height:44px;padding:7px 10px}
+        .pahri-toggle-compact .pahri-toggle-box{width:24px;height:24px;flex-basis:24px;border-radius:7px}
+        .pahri-toggle-wide{max-width:520px;margin-bottom:20px}
     </style>
 
     <script>
@@ -310,18 +315,30 @@
                 if (!preview) return;
                 preview.style.borderRadius = document.getElementById('pahri-radius').value + 'px';
                 preview.style.backdropFilter = 'blur(' + document.getElementById('pahri-blur').value + 'px)';
-                preview.style.boxShadow = '0 30px 80px rgba(0,0,0,.45), 0 0 50px ' + accent.value + '33, inset 0 1px rgba(255,255,255,.08)';
+                preview.style.boxShadow = '0 30px 80px rgba(0,0,0,.45),0 0 50px ' + accent.value + '33,inset 0 1px rgba(255,255,255,.08)';
             }
 
-            if (preset) {
-                preset.addEventListener('change', function () {
-                    if (presets[preset.value]) {
-                        accent.value = presets[preset.value][0];
-                        secondary.value = presets[preset.value][1];
-                        updatePreview();
-                    }
-                });
-            }
+            document.addEventListener('click', function (event) {
+                var button = event.target.closest ? event.target.closest('.pahri-toggle-button') : null;
+                if (!button) return;
+                event.preventDefault();
+                var control = button.closest('.pahri-toggle-control');
+                var input = control ? control.querySelector('.pahri-toggle-value') : null;
+                var state = button.querySelector('.pahri-toggle-state');
+                var active = button.getAttribute('aria-pressed') !== 'true';
+                button.setAttribute('aria-pressed', active ? 'true' : 'false');
+                button.classList.toggle('is-active', active);
+                if (input) input.value = active ? '1' : '0';
+                if (state) state.textContent = active ? 'ON' : 'OFF';
+            });
+
+            if (preset) preset.addEventListener('change', function () {
+                if (presets[preset.value]) {
+                    accent.value = presets[preset.value][0];
+                    secondary.value = presets[preset.value][1];
+                    updatePreview();
+                }
+            });
 
             [accent, secondary].forEach(function (input) {
                 if (input) input.addEventListener('input', function () {
