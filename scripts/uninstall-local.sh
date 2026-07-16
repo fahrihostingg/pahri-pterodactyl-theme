@@ -21,6 +21,7 @@ SOURCE_FILES=(
     "resources/scripts/components/dashboard/ServerRow.tsx"
     "resources/scripts/components/elements/PageContentBlock.tsx"
     "resources/scripts/components/elements/SubNavigation.tsx"
+    "resources/scripts/components/server/files/SelectFileCheckbox.tsx"
     "resources/scripts/routers/AuthenticationRouter.tsx"
 )
 
@@ -79,15 +80,13 @@ done
 source "$BACKUP_DIR/meta.env"
 
 if [[ "${HAD_CONTROLLER:-0}" == "1" ]]; then
-    install -D -m 0644 "$BACKUP_DIR/original/app/Http/Controllers/Admin/Settings/AppearanceController.php" \
-        "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php"
+    install -D -m 0644 "$BACKUP_DIR/original/app/Http/Controllers/Admin/Settings/AppearanceController.php" "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php"
 else
     rm -f "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php"
 fi
 
 if [[ "${HAD_VIEW:-0}" == "1" ]]; then
-    install -D -m 0644 "$BACKUP_DIR/original/resources/views/admin/settings/appearance.blade.php" \
-        "$PANEL_DIR/resources/views/admin/settings/appearance.blade.php"
+    install -D -m 0644 "$BACKUP_DIR/original/resources/views/admin/settings/appearance.blade.php" "$PANEL_DIR/resources/views/admin/settings/appearance.blade.php"
 else
     rm -f "$PANEL_DIR/resources/views/admin/settings/appearance.blade.php"
 fi
