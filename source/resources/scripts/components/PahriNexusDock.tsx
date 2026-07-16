@@ -103,9 +103,7 @@ const dockLinkStyles = `
         box-shadow: 0 14px 38px rgba(0,0,0,.32), 0 0 26px color-mix(in srgb,var(--pahri-accent) 18%,transparent);
     }
 
-    @media (max-width: 880px) {
-        span { display: none; }
-    }
+    @media (max-width: 880px) { span { display: none; } }
 `;
 
 const DockLink = styled.a`${dockLinkStyles}`;
@@ -121,7 +119,6 @@ const Clock = styled.div`
     border: 1px solid rgba(255,255,255,.085);
     border-radius: 999px;
     background: rgba(2,6,23,.44);
-
     strong { color: #fff; font-size: 12px; font-weight: 870; line-height: 1; }
     small { margin-top: 4px; color: rgba(226,232,240,.36); font-size: 7px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     @media (max-width: 600px) { display: none; }
@@ -145,18 +142,9 @@ const Support = styled.a`
     box-shadow: 0 24px 70px rgba(0,0,0,.45), 0 0 38px color-mix(in srgb,var(--pahri-accent) 35%,transparent);
     text-decoration: none !important;
     transition: .22s ease;
-
     span { font-size: 10px; font-weight: 880; letter-spacing: .08em; text-transform: uppercase; }
     &:hover { color: #fff; transform: translateY(-4px) scale(1.03); filter: brightness(1.08); }
-
-    @media (max-width: 760px) {
-        right: 10px;
-        bottom: 78px;
-        height: 48px;
-        min-width: 48px;
-        padding: 0 13px;
-        span { display: none; }
-    }
+    @media (max-width: 760px) { right: 10px; bottom: 78px; height: 48px; min-width: 48px; padding: 0 13px; span { display: none; } }
 `;
 
 const Spotlight = styled.div`
@@ -171,19 +159,7 @@ const Spotlight = styled.div`
     background: rgba(5,9,23,calc(var(--pahri-glass-opacity,.78) * .9));
     box-shadow: 0 24px 70px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.065);
     backdrop-filter: blur(var(--pahri-blur,24px)) saturate(160%);
-
-    &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 14px;
-        bottom: 14px;
-        width: 3px;
-        border-radius: 999px;
-        background: linear-gradient(var(--pahri-accent),var(--pahri-accent-secondary));
-        box-shadow: 0 0 16px var(--pahri-accent);
-    }
-
+    &::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 999px; background: linear-gradient(var(--pahri-accent),var(--pahri-accent-secondary)); box-shadow: 0 0 16px var(--pahri-accent); }
     strong { display: block; color: #fff; font-size: 12px; font-weight: 860; letter-spacing: -.02em; }
     p { margin: 6px 0 0; color: rgba(226,232,240,.48); font-size: 10px; line-height: 1.6; }
     @media (max-width: 900px) { display: none; }
@@ -207,7 +183,7 @@ export default ({ authenticated, rootAdmin }: Props) => {
         return () => window.clearInterval(timer);
     }, []);
 
-    if (!authenticated || runtime.dock?.active === false) return null;
+    if (!authenticated) return null;
 
     const supportUrl = runtime.dock?.support_url && isSafeUrl(runtime.dock.support_url) ? runtime.dock.support_url : '/account';
     const supportLabel = runtime.dock?.support_label || 'Support';
@@ -232,9 +208,7 @@ export default ({ authenticated, rootAdmin }: Props) => {
                 <InternalLink to={'/'}><FontAwesomeIcon icon={faServer} /><span>Servers</span></InternalLink>
                 <InternalLink to={'/account'}><FontAwesomeIcon icon={faUserCircle} /><span>Account</span></InternalLink>
                 {rootAdmin && <DockLink href={'/admin'}><FontAwesomeIcon icon={faCogs} /><span>Admin</span></DockLink>}
-                {customLinks.map(link => (
-                    <DockLink key={`${link.label}:${link.url}`} href={link.url}><FontAwesomeIcon icon={faExternalLinkAlt} /><span>{link.label}</span></DockLink>
-                ))}
+                {customLinks.map(link => <DockLink key={`${link.label}:${link.url}`} href={link.url}><FontAwesomeIcon icon={faExternalLinkAlt} /><span>{link.label}</span></DockLink>)}
                 <Clock><strong>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong><small><FontAwesomeIcon icon={faBolt} /> Nexus</small></Clock>
             </DockWrap>
         </>
