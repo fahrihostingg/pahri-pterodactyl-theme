@@ -14,9 +14,7 @@ log() { printf '\033[1;36m[PAHRI GITHUB]\033[0m %s\n' "$*"; }
 ok() { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 
-cleanup() {
-    [[ -z "$TEMP_DIR" ]] || rm -rf "$TEMP_DIR"
-}
+cleanup() { [[ -z "$TEMP_DIR" ]] || rm -rf "$TEMP_DIR"; }
 trap cleanup EXIT
 
 run_local_installer() {
@@ -35,7 +33,7 @@ run_local_installer() {
     bash "$root/scripts/install-v2.sh"
     bash "$root/scripts/install-source.sh"
 
-    local version="6.1.0"
+    local version="6.2.0"
     if [[ -f "$root/VERSION" ]]; then
         version="$(tr -d '[:space:]' < "$root/VERSION")"
     fi
@@ -43,8 +41,9 @@ run_local_installer() {
     printf '\n'
     ok "Pahri Thema New ${version} berjaya dipasang sepenuhnya."
     printf 'Admin Studio: /admin/settings/appearance\n'
-    printf 'Maintenance Guard: Admin Panel > Settings > Pahri Thema New > Quick Links & Status\n'
     printf 'Command Engine: Ctrl + K\n'
+    printf 'Maintenance Guard: hanya user ID 1 boleh bypass\n'
+    printf 'Security Drill: Admin Panel > Settings > Pahri Thema New > Quick Links & Status\n'
     printf 'Broadcast Center: Admin Panel > Settings > Pahri Thema New\n'
 }
 
@@ -53,10 +52,8 @@ if [[ -n "$SELF_DIR" && -f "$SELF_DIR/scripts/install-local.sh" && -d "$SELF_DIR
     exit $?
 fi
 
-[[ "$THEME_REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] \
-    || die "PAHRI_THEME_REPO tidak sah. Gunakan format owner/repository."
-[[ "$THEME_REF" =~ ^[A-Za-z0-9._/-]+$ ]] \
-    || die "PAHRI_THEME_REF tidak sah."
+[[ "$THEME_REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die "PAHRI_THEME_REPO tidak sah. Gunakan format owner/repository."
+[[ "$THEME_REF" =~ ^[A-Za-z0-9._/-]+$ ]] || die "PAHRI_THEME_REF tidak sah."
 command -v tar >/dev/null 2>&1 || die "Perintah tar diperlukan."
 
 TEMP_DIR="$(mktemp -d -t pahri-theme.XXXXXX)"
@@ -65,9 +62,7 @@ ARCHIVE_FILE="$TEMP_DIR/theme.tar.gz"
 
 log "Memuat turun ${THEME_REPO}@${THEME_REF} daripada GitHub..."
 if command -v curl >/dev/null 2>&1; then
-    curl --fail --location --silent --show-error \
-        --retry 3 --retry-delay 2 --connect-timeout 15 \
-        "$ARCHIVE_URL" --output "$ARCHIVE_FILE"
+    curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --connect-timeout 15 "$ARCHIVE_URL" --output "$ARCHIVE_FILE"
 elif command -v wget >/dev/null 2>&1; then
     wget --quiet --tries=3 --timeout=30 "$ARCHIVE_URL" -O "$ARCHIVE_FILE"
 else
