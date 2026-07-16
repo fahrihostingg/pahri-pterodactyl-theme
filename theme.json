@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.1.0",
-  "codename": "Maintenance Guard",
+  "version": "6.2.0",
+  "codename": "Guard Drill",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -16,10 +16,10 @@
     "admin quick links",
     "visual presets",
     "interactive holographic server cards",
-    "green checked-state controls",
-    "white empty unchecked controls",
-    "admin-only maintenance mode",
-    "custom maintenance title and message",
-    "root admin bypass"
+    "single clean custom checkbox controls",
+    "user ID 1 maintenance bypass",
+    "maintenance guard",
+    "security drill fake hacking visual mode",
+    "custom security terminal text"
   ]
 }
