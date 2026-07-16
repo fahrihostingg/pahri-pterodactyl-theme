@@ -24,6 +24,7 @@ REPLACE_FILES=(
     "resources/scripts/components/dashboard/ServerRow.tsx"
     "resources/scripts/components/elements/PageContentBlock.tsx"
     "resources/scripts/components/elements/SubNavigation.tsx"
+    "resources/scripts/components/server/files/SelectFileCheckbox.tsx"
     "resources/scripts/routers/AuthenticationRouter.tsx"
 )
 
@@ -101,7 +102,7 @@ else
     warn "Source theme telah dipasang. Mengemas kini tanpa menimpa backup asal."
 fi
 
-log "Menyalin komponen Pahri Thema New 6.2..."
+log "Menyalin komponen Pahri Thema New 6.4..."
 copy_theme_files "$SOURCE_DIR" "$PANEL_DIR"
 log "Membina frontend production dengan Node $(node -v) dan Yarn $(yarn --version)..."
 build_panel
@@ -110,5 +111,5 @@ chown -R "$PANEL_OWNER" "$PANEL_DIR/public/assets"
 for relative in "${ALL_FILES[@]}"; do chown "$PANEL_OWNER" "$PANEL_DIR/$relative"; done
 COMPLETED=1
 trap - ERR
-ok "Pahri Thema New 6.2 berjaya dibina dan diaktifkan."
+ok "Pahri Thema New 6.4 berjaya dibina dan diaktifkan."
 printf 'Backup asal: %s\n' "$ORIGINAL_BACKUP"
