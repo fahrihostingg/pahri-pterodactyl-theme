@@ -29,6 +29,7 @@ REPLACE_FILES=(
 
 EXTRA_FILES=(
     "resources/scripts/components/PahriBroadcast.tsx"
+    "resources/scripts/components/PahriMaintenanceGate.tsx"
     "resources/scripts/components/PahriNexusDock.tsx"
 )
 
@@ -61,18 +62,15 @@ ensure_node() {
     fi
 
     command -v apt-get >/dev/null 2>&1 || die "Auto-install Node.js hanya disokong pada Ubuntu/Debian. Pasang Node.js 22 atau 24 secara manual."
-
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
     apt-get install -y ca-certificates curl gnupg
-
     local setup_file
     setup_file="$(mktemp -t nodesource-setup.XXXXXX.sh)"
     curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --connect-timeout 20 https://deb.nodesource.com/setup_24.x --output "$setup_file"
     [[ -s "$setup_file" ]] || die "Skrip pemasangan NodeSource kosong."
     bash "$setup_file"
     rm -f "$setup_file"
-
     apt-get install -y nodejs
     hash -r
     command -v node >/dev/null 2>&1 || die "Node.js gagal dipasang."
@@ -174,7 +172,7 @@ else
     warn "Source theme telah dipasang. Mengemas kini tanpa menimpa backup asal."
 fi
 
-log "Menyalin komponen Pahri Thema New 6.0..."
+log "Menyalin komponen Pahri Thema New 6.1..."
 copy_theme_files "$SOURCE_DIR" "$PANEL_DIR"
 
 log "Membina frontend production dengan Node $(node -v) dan Yarn $(yarn --version)..."
@@ -188,5 +186,5 @@ done
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Thema New 6.0 berjaya dibina dan diaktifkan."
+ok "Pahri Thema New 6.1 berjaya dibina dan diaktifkan."
 printf 'Backup asal: %s\n' "$ORIGINAL_BACKUP"
