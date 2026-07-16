@@ -26,6 +26,7 @@ SOURCE_FILES=(
 
 EXTRA_SOURCE_FILES=(
     "resources/scripts/components/PahriBroadcast.tsx"
+    "resources/scripts/components/PahriMaintenanceGate.tsx"
     "resources/scripts/components/PahriNexusDock.tsx"
 )
 
