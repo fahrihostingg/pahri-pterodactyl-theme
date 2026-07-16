@@ -20,9 +20,7 @@ class AppearanceController extends Controller
 
     public function index(): View
     {
-        return view('admin.settings.appearance', [
-            'settings' => $this->readSettings(),
-        ]);
+        return view('admin.settings.appearance', ['settings' => $this->readSettings()]);
     }
 
     public function update(Request $request): RedirectResponse
@@ -64,6 +62,12 @@ class AppearanceController extends Controller
             'maintenance_title' => ['nullable', 'string', 'max:120'],
             'maintenance_message' => ['nullable', 'string', 'max:1000'],
 
+            'security_drill_enabled' => ['nullable', 'boolean'],
+            'security_drill_badge' => ['nullable', 'string', 'max:40'],
+            'security_drill_title' => ['nullable', 'string', 'max:120'],
+            'security_drill_message' => ['nullable', 'string', 'max:1000'],
+            'security_drill_terminal' => ['nullable', 'string', 'max:1500'],
+
             'quick_link_label_1' => ['nullable', 'string', 'max:40'],
             'quick_link_url_1' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
             'quick_link_label_2' => ['nullable', 'string', 'max:40'],
@@ -74,7 +78,7 @@ class AppearanceController extends Controller
 
         $settings = array_merge($this->defaults(), $this->readSettings(), [
             'theme_name' => 'Pahri Thema New',
-            'theme_version' => '6.1.0',
+            'theme_version' => '6.2.0',
             'preset' => $validated['preset'],
             'accent' => strtolower($validated['accent']),
             'accent_secondary' => strtolower($validated['accent_secondary']),
@@ -116,9 +120,18 @@ class AppearanceController extends Controller
             ],
             'maintenance' => [
                 'enabled' => $request->boolean('maintenance_enabled'),
+                'access_user_id' => 1,
                 'badge' => trim((string) ($validated['maintenance_badge'] ?? 'Maintenance Mode')),
                 'title' => trim((string) ($validated['maintenance_title'] ?? 'Panel sedang maintenance')),
                 'message' => trim((string) ($validated['maintenance_message'] ?? 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.')),
+            ],
+            'security_drill' => [
+                'enabled' => $request->boolean('security_drill_enabled'),
+                'access_user_id' => 1,
+                'badge' => trim((string) ($validated['security_drill_badge'] ?? 'Security Drill')),
+                'title' => trim((string) ($validated['security_drill_title'] ?? 'Security Lockdown Simulation')),
+                'message' => trim((string) ($validated['security_drill_message'] ?? 'Panel sedang berada dalam mod simulasi keselamatan. Ini bukan serangan sebenar.')),
+                'terminal' => trim((string) ($validated['security_drill_terminal'] ?? "[SIMULATION MODE]\n> scanning interface...\n> locking client access...\n> root user id 1 bypass enabled...\n> system guarded by Pahri Thema New")),
             ],
             'quick_links' => $this->quickLinks($validated),
             'updated_at' => now()->toIso8601String(),
@@ -129,7 +142,6 @@ class AppearanceController extends Controller
         if ($request->hasFile('logo')) {
             $settings['logo'] = $this->storeImage($request->file('logo'), 'logo', $settings['logo'] ?? null);
         }
-
         if ($request->hasFile('wallpaper')) {
             $settings['wallpaper'] = $this->storeImage($request->file('wallpaper'), 'wallpaper', $settings['wallpaper'] ?? null);
         }
@@ -137,8 +149,7 @@ class AppearanceController extends Controller
         $this->writeSettings($settings);
         $this->writeCustomCss($settings);
 
-        $this->alert->success('Pahri Thema New 6.1 berjaya dikemas kini. Maintenance Mode, Broadcast Center dan Visual Lab telah digunakan.')->flash();
-
+        $this->alert->success('Pahri Thema New 6.2 berjaya dikemas kini. Checkbox, Maintenance Guard dan Security Drill telah digunakan.')->flash();
         return redirect()->route('admin.settings.appearance');
     }
 
@@ -146,7 +157,7 @@ class AppearanceController extends Controller
     {
         return [
             'theme_name' => 'Pahri Thema New',
-            'theme_version' => '6.1.0',
+            'theme_version' => '6.2.0',
             'preset' => 'obsidian',
             'accent' => '#a855f7',
             'accent_secondary' => '#22d3ee',
@@ -160,31 +171,16 @@ class AppearanceController extends Controller
             'logo' => '/themes/pahri/default-logo.svg',
             'wallpaper' => '/themes/pahri/default-wallpaper.svg',
             'broadcast' => [
-                'active' => false,
-                'title' => '',
-                'message' => '',
-                'type' => 'info',
-                'mode' => 'banner',
-                'audience' => 'all',
-                'dismissible' => true,
-                'starts_at' => null,
-                'ends_at' => null,
-                'button_text' => '',
-                'button_url' => '',
-                'revision' => 'initial',
+                'active' => false, 'title' => '', 'message' => '', 'type' => 'info', 'mode' => 'banner', 'audience' => 'all', 'dismissible' => true, 'starts_at' => null, 'ends_at' => null, 'button_text' => '', 'button_url' => '', 'revision' => 'initial',
             ],
             'dock' => [
-                'active' => false,
-                'support_label' => 'Support',
-                'support_url' => '/account',
-                'spotlight_title' => 'Nexus Dock Active',
-                'spotlight_message' => 'Quick actions, live time, support and custom links are ready from one floating dock.',
+                'active' => false, 'support_label' => 'Support', 'support_url' => '/account', 'spotlight_title' => 'Nexus Dock Active', 'spotlight_message' => 'Quick actions, live time, support and custom links are ready from one floating dock.',
             ],
             'maintenance' => [
-                'enabled' => false,
-                'badge' => 'Maintenance Mode',
-                'title' => 'Panel sedang maintenance',
-                'message' => 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.',
+                'enabled' => false, 'access_user_id' => 1, 'badge' => 'Maintenance Mode', 'title' => 'Panel sedang maintenance', 'message' => 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.',
+            ],
+            'security_drill' => [
+                'enabled' => false, 'access_user_id' => 1, 'badge' => 'Security Drill', 'title' => 'Security Lockdown Simulation', 'message' => 'Panel sedang berada dalam mod simulasi keselamatan. Ini bukan serangan sebenar.', 'terminal' => "[SIMULATION MODE]\n> scanning interface...\n> locking client access...\n> root user id 1 bypass enabled...\n> system guarded by Pahri Thema New",
             ],
             'quick_links' => [],
             'updated_at' => null,
@@ -194,40 +190,27 @@ class AppearanceController extends Controller
     private function readSettings(): array
     {
         $path = $this->themePath('settings.json');
-
-        if (!File::exists($path)) {
-            return $this->defaults();
-        }
-
+        if (!File::exists($path)) return $this->defaults();
         $decoded = json_decode((string) File::get($path), true);
-
-        if (!is_array($decoded)) {
-            return $this->defaults();
-        }
-
+        if (!is_array($decoded)) return $this->defaults();
         $defaults = $this->defaults();
         $settings = array_merge($defaults, $decoded);
         $settings['broadcast'] = array_merge($defaults['broadcast'], is_array($decoded['broadcast'] ?? null) ? $decoded['broadcast'] : []);
         $settings['dock'] = array_merge($defaults['dock'], is_array($decoded['dock'] ?? null) ? $decoded['dock'] : []);
         $settings['maintenance'] = array_merge($defaults['maintenance'], is_array($decoded['maintenance'] ?? null) ? $decoded['maintenance'] : []);
+        $settings['security_drill'] = array_merge($defaults['security_drill'], is_array($decoded['security_drill'] ?? null) ? $decoded['security_drill'] : []);
         $settings['quick_links'] = is_array($decoded['quick_links'] ?? null) ? $decoded['quick_links'] : [];
-
         return $settings;
     }
 
     private function quickLinks(array $validated): array
     {
         $links = [];
-
         for ($index = 1; $index <= 3; $index++) {
             $label = trim((string) ($validated['quick_link_label_' . $index] ?? ''));
             $url = trim((string) ($validated['quick_link_url_' . $index] ?? ''));
-
-            if ($label !== '' && $url !== '') {
-                $links[] = ['label' => $label, 'url' => $url];
-            }
+            if ($label !== '' && $url !== '') $links[] = ['label' => $label, 'url' => $url];
         }
-
         return $links;
     }
 
@@ -236,9 +219,7 @@ class AppearanceController extends Controller
         $path = $this->themePath('settings.json');
         $temporary = $path . '.tmp';
         $json = json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-
         File::put($temporary, $json . PHP_EOL, true);
-
         if (!@rename($temporary, $path)) {
             @unlink($temporary);
             throw new RuntimeException('Tidak dapat menyimpan settings.json untuk Pahri Thema New. Semak permission folder public/themes/pahri.');
@@ -258,7 +239,6 @@ class AppearanceController extends Controller
         $radius = (int) $settings['radius'];
         $motion = max(50, min(180, (int) $settings['motion']));
         $motionDuration = number_format(max(8, min(30, 18 / ($motion / 100))), 2, '.', '');
-
         $css = <<<CSS
 :root {
     --pahri-accent: {$accent};
@@ -273,44 +253,26 @@ class AppearanceController extends Controller
     --pahri-motion-duration: {$motionDuration}s;
 }
 CSS;
-
         File::put($this->themePath('custom.css'), $css . PHP_EOL, true);
     }
 
     private function storeImage($file, string $prefix, ?string $previousPath): string
     {
         $mime = (string) $file->getMimeType();
-        $extensions = [
-            'image/png' => 'png',
-            'image/jpeg' => 'jpg',
-            'image/webp' => 'webp',
-        ];
-
-        if (!isset($extensions[$mime])) {
-            throw new RuntimeException('Format gambar tidak disokong. Gunakan PNG, JPG, atau WEBP.');
-        }
-
+        $extensions = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/webp' => 'webp'];
+        if (!isset($extensions[$mime])) throw new RuntimeException('Format gambar tidak disokong. Gunakan PNG, JPG, atau WEBP.');
         $name = sprintf('%s-%s.%s', $prefix, bin2hex(random_bytes(8)), $extensions[$mime]);
         $destination = $this->themePath('uploads');
         $file->move($destination, $name);
-
         $this->deletePreviousUpload($previousPath);
-
         return '/themes/pahri/uploads/' . $name;
     }
 
     private function deletePreviousUpload(?string $path): void
     {
-        if (!$path || !str_starts_with($path, '/themes/pahri/uploads/')) {
-            return;
-        }
-
-        $filename = basename($path);
-        $fullPath = $this->themePath('uploads/' . $filename);
-
-        if (File::exists($fullPath)) {
-            File::delete($fullPath);
-        }
+        if (!$path || !str_starts_with($path, '/themes/pahri/uploads/')) return;
+        $fullPath = $this->themePath('uploads/' . basename($path));
+        if (File::exists($fullPath)) File::delete($fullPath);
     }
 
     private function cssUrl(string $path): string
