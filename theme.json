@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.3.0",
-  "codename": "Visual Breach Simulation",
+  "version": "6.3.1",
+  "codename": "Single Toggle Controls",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -10,16 +10,14 @@
   "features": [
     "source-level full reskin",
     "broadcast center",
-    "scheduled banner and modal",
-    "audience targeting",
     "nexus command engine",
     "admin quick links",
     "visual presets",
-    "interactive holographic server cards",
-    "green checked-state controls",
-    "white empty unchecked controls",
-    "maintenance mode with user id 1 bypass",
-    "non-blocking fake hacking visual mode",
-    "glitch overlay and corrupted theme simulation"
+    "interactive server cards",
+    "single custom toggle per feature",
+    "green ON state",
+    "white OFF state",
+    "maintenance access control",
+    "visual security simulation"
   ]
 }
