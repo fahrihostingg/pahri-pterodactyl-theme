@@ -9,8 +9,9 @@
         ['Aurelia Control', 'Nexus Control'],
         ['Luxury Spatial Control', 'Nexus Spatial Operating Theme'],
         ['All Aurelia core systems operational', 'All Nexus core systems operational'],
-        ['Version 4.0 • by Pahri', 'Version 6.0 • by Pahri'],
-        ['Version 5.0 • by Pahri', 'Version 6.0 • by Pahri'],
+        ['Version 4.0 • by Pahri', 'Version 6.1 • by Pahri'],
+        ['Version 5.0 • by Pahri', 'Version 6.1 • by Pahri'],
+        ['Version 6.0 • by Pahri', 'Version 6.1 • by Pahri'],
     ]);
 
     const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({
@@ -30,6 +31,14 @@
         });
     };
 
+    const fetchConfig = async () => {
+        try {
+            const response = await fetch('/themes/pahri/settings.json?studio=' + Date.now(), { cache: 'no-store' });
+            if (response.ok) return await response.json();
+        } catch (error) {}
+        return {};
+    };
+
     const injectDockStudio = async () => {
         if (!location.pathname.includes('/admin/settings/appearance')) return;
         if (document.getElementById('pahri-dock-studio')) return;
@@ -37,28 +46,52 @@
         const target = document.getElementById('pahri-links');
         if (!target) return;
 
-        let config = {};
-        try {
-            const response = await fetch('/themes/pahri/settings.json?studio=' + Date.now(), { cache: 'no-store' });
-            if (response.ok) config = await response.json();
-        } catch (error) {
-            config = {};
-        }
-
+        const config = await fetchConfig();
         const dock = Object.assign({
-            active: true,
+            active: false,
             support_label: 'Support',
             support_url: '/account',
             spotlight_title: 'Nexus Dock Active',
             spotlight_message: 'Quick actions, live time, support and custom links are ready from one floating dock.'
         }, config.dock || {});
+        const maintenance = Object.assign({
+            enabled: false,
+            badge: 'Maintenance Mode',
+            title: 'Panel sedang maintenance',
+            message: 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.'
+        }, config.maintenance || {});
 
         const studio = document.createElement('div');
         studio.id = 'pahri-dock-studio';
         studio.className = 'callout callout-info';
         studio.innerHTML = `
+            <h4><i class="fa fa-shield"></i> Maintenance Guard</h4>
+            <p>Kalau ON, client biasa akan dikunci pada halaman maintenance. Root admin masih boleh akses panel dan Admin Panel.</p>
+            <div class="checkbox pahri-checkbox">
+                <label>
+                    <input type="hidden" name="maintenance_enabled" value="0">
+                    <input class="pahri-checkbox-input" type="checkbox" name="maintenance_enabled" value="1" ${maintenance.enabled ? 'checked' : ''}>
+                    <span class="pahri-checkbox-ui" aria-hidden="true"></span>
+                    <span class="pahri-checkbox-label">Aktifkan maintenance mode — hanya root admin boleh akses</span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Maintenance Badge</label>
+                    <input type="text" name="maintenance_badge" class="form-control" maxlength="40" value="${escapeHtml(maintenance.badge)}" placeholder="Maintenance Mode">
+                </div>
+                <div class="form-group col-md-8">
+                    <label>Maintenance Title</label>
+                    <input type="text" name="maintenance_title" class="form-control" maxlength="120" value="${escapeHtml(maintenance.title)}" placeholder="Panel sedang maintenance">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Maintenance Message</label>
+                <textarea name="maintenance_message" class="form-control" rows="3" maxlength="1000" placeholder="Mesej untuk user biasa...">${escapeHtml(maintenance.message)}</textarea>
+            </div>
+            <hr style="border-color: rgba(255,255,255,.12);">
             <h4><i class="fa fa-rocket"></i> Nexus Dock Studio</h4>
-            <p>Kawal floating dock bawah panel, support bubble dan spotlight card. Semua input ini disimpan bersama tetapan tema.</p>
+            <p>Kawal floating dock bawah panel, support bubble dan spotlight card. Dock masih boleh dimatikan kalau panel blank.</p>
             <div class="checkbox pahri-checkbox">
                 <label>
                     <input type="hidden" name="dock_active" value="0">
