@@ -17,6 +17,8 @@ command -v python3 >/dev/null 2>&1 || die "Python 3 diperlukan."
 ASSETS=(
     brand.js
     thema-new.js
+    store.json
+    features-150.json
     nova-client-shell.css
     nova-client-surfaces.css
     nova-client-controls.css
@@ -32,7 +34,7 @@ for asset in "${ASSETS[@]}"; do
 done
 [[ -f "$PACKAGE_DIR/patcher-v2.py" ]] || die "patcher-v2.py tiada."
 
-log "Memasang modul Nexus full reskin..."
+log "Memasang modul Nexus full reskin, store config dan feature hub..."
 mkdir -p "$TARGET_DIR"
 for asset in "${ASSETS[@]}"; do
     install -m 0644 "$ASSET_DIR/$asset" "$TARGET_DIR/$asset"
