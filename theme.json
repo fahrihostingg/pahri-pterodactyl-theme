@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.3.1",
-  "codename": "Single Toggle Controls",
+  "version": "6.4.0",
+  "codename": "Storefront Feature Hub",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -15,8 +15,10 @@
     "visual presets",
     "interactive server cards",
     "single custom toggle per feature",
-    "green ON state",
-    "white OFF state",
+    "file manager green selected tick",
+    "store landing page",
+    "safe qris store config",
+    "150 feature hub runtime list",
     "maintenance access control",
     "visual security simulation"
   ]
