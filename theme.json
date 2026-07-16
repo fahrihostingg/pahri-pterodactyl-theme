@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.0.1",
-  "codename": "Nexus Dock Hotfix",
+  "version": "6.1.0",
+  "codename": "Maintenance Guard",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -18,11 +18,8 @@
     "interactive holographic server cards",
     "green checked-state controls",
     "white empty unchecked controls",
-    "floating nexus dock",
-    "support action bubble",
-    "live clock dock",
-    "spotlight information card",
-    "nexus dock studio",
-    "blank screen hotfix"
+    "admin-only maintenance mode",
+    "custom maintenance title and message",
+    "root admin bypass"
   ]
 }
