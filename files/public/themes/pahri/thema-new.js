@@ -2,6 +2,7 @@
     'use strict';
 
     const brand = 'Pahri Thema New';
+    const versionLabel = 'Version 6.4.1 • by Pahri';
     const replacements = new Map([
         ['Pahri Aurelia', brand],
         ['Pahri Panel', brand],
@@ -9,12 +10,14 @@
         ['Aurelia Control', 'Nexus Control'],
         ['Luxury Spatial Control', 'Nexus Spatial Operating Theme'],
         ['All Aurelia core systems operational', 'All Nexus core systems operational'],
-        ['Version 4.0 • by Pahri', 'Version 6.3.1 • by Pahri'],
-        ['Version 5.0 • by Pahri', 'Version 6.3.1 • by Pahri'],
-        ['Version 6.0 • by Pahri', 'Version 6.3.1 • by Pahri'],
-        ['Version 6.1 • by Pahri', 'Version 6.3.1 • by Pahri'],
-        ['Version 6.2 • by Pahri', 'Version 6.3.1 • by Pahri'],
-        ['Version 6.3 • by Pahri', 'Version 6.3.1 • by Pahri'],
+        ['Version 4.0 • by Pahri', versionLabel],
+        ['Version 5.0 • by Pahri', versionLabel],
+        ['Version 6.0 • by Pahri', versionLabel],
+        ['Version 6.1 • by Pahri', versionLabel],
+        ['Version 6.2 • by Pahri', versionLabel],
+        ['Version 6.3 • by Pahri', versionLabel],
+        ['Version 6.3.1 • by Pahri', versionLabel],
+        ['Version 6.4.0 • by Pahri', versionLabel],
     ]);
 
     const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({
@@ -81,11 +84,47 @@
             message: 'User masih boleh akses panel, tapi tema akan nampak hancur/glitch seperti sedang diganggu. Ini hanya simulasi visual.',
             terminal: '[VISUAL SIMULATION MODE]\n> interface distortion enabled\n> client access remains open\n> UI integrity: unstable\n> admin bypass: user id 1\n> no real exploit executed'
         }, config.security_drill || {});
+        const store = Object.assign({
+            enabled: false,
+            store_name: 'Pahri Panel Store',
+            currency: 'IDR',
+            whatsapp: '',
+            qris_provider: 'qris.zakki.store',
+            qris_endpoint: 'https://qris.zakki.store',
+            qris_merchant_id: '',
+            qris_status: 'backend_token_required'
+        }, config.store || {});
+
+        const ownerStore = Number(window.PahriUserId || 0) === 1 ? `
+            <hr style="border-color:rgba(255,255,255,.12);">
+            <h4><i class="fa fa-shopping-cart"></i> Owner Store & QRIS</h4>
+            <p>Section ini hanya untuk user ID 1. API key QRIS disimpan dalam <code>storage/app/pahri-store-secrets.json</code>, bukan dalam public frontend.</p>
+            ${toggleMarkup('store_enabled', 'Aktifkan Store Landing', 'Paparkan store panel ikut RAM pada halaman pertama', Boolean(store.enabled))}
+            <div class="row">
+                <div class="form-group col-md-5"><label>Store Name</label><input type="text" name="store_name" class="form-control" maxlength="80" value="${escapeHtml(store.store_name)}" placeholder="Pahri Panel Store"></div>
+                <div class="form-group col-md-3"><label>Currency</label><select name="store_currency" class="form-control"><option value="IDR" ${store.currency === 'IDR' ? 'selected' : ''}>IDR</option><option value="MYR" ${store.currency === 'MYR' ? 'selected' : ''}>MYR</option><option value="USD" ${store.currency === 'USD' ? 'selected' : ''}>USD</option></select></div>
+                <div class="form-group col-md-4"><label>WhatsApp Order</label><input type="text" name="store_whatsapp" class="form-control" maxlength="40" value="${escapeHtml(store.whatsapp)}" placeholder="6011xxxxxxx"></div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6"><label>QRIS Endpoint</label><input type="text" name="store_qris_endpoint" class="form-control" maxlength="500" value="${escapeHtml(store.qris_endpoint)}" placeholder="https://qris.zakki.store"></div>
+                <div class="form-group col-md-6"><label>QRIS Merchant ID</label><input type="text" name="store_qris_merchant_id" class="form-control" maxlength="120" value="${escapeHtml(store.qris_merchant_id)}" placeholder="merchant id"></div>
+            </div>
+            <div class="form-group"><label>QRIS API Key / Token</label><input type="password" name="store_qris_api_key" class="form-control" maxlength="2000" value="" autocomplete="new-password" placeholder="Kosongkan kalau tak mahu tukar token yang tersimpan"></div>
+            <div class="pahri-toggle-control pahri-toggle-compact">
+                <input type="hidden" name="store_qris_clear_key" class="pahri-toggle-value" value="0">
+                <button type="button" class="pahri-toggle-button" aria-pressed="false">
+                    <span class="pahri-toggle-box"><i class="fa fa-check"></i></span>
+                    <span class="pahri-toggle-copy"><strong>Clear QRIS Token</strong><small>Padam token tersimpan <b class="pahri-toggle-state">OFF</b></small></span>
+                </button>
+            </div>
+            <p class="help-block">Status QRIS: ${escapeHtml(store.qris_status || 'backend_token_required')}. Token tidak akan dipaparkan semula selepas disimpan.</p>
+        ` : '';
 
         const studio = document.createElement('div');
         studio.id = 'pahri-dock-studio';
         studio.className = 'callout callout-info';
         studio.innerHTML = `
+            ${ownerStore}
             <h4><i class="fa fa-shield"></i> Maintenance Guard</h4>
             <p>Kalau ON, user biasa dikunci pada halaman maintenance. Hanya user ID 1 boleh bypass dan akses panel.</p>
             ${toggleMarkup('maintenance_enabled', 'Maintenance Mode', 'Hanya user ID 1 boleh bypass', Boolean(maintenance.enabled))}
