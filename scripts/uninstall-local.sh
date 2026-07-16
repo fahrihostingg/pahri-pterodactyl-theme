@@ -37,8 +37,11 @@ if [[ -f "$SOURCE_STATE_FILE" ]]; then
 
     log "Memulihkan source React asal..."
     for relative in "${SOURCE_FILES[@]}"; do
-        [[ -f "$SOURCE_BACKUP/$relative" ]] || die "Backup source tiada: $relative"
-        install -D -m 0644 "$SOURCE_BACKUP/$relative" "$PANEL_DIR/$relative"
+        if [[ -f "$SOURCE_BACKUP/$relative" ]]; then
+            install -D -m 0644 "$SOURCE_BACKUP/$relative" "$PANEL_DIR/$relative"
+        else
+            warn "Backup source tiada, dilangkau: $relative"
+        fi
     done
 
     for relative in "${EXTRA_SOURCE_FILES[@]}"; do
@@ -97,7 +100,7 @@ if [[ "${HAD_THEME:-0}" == "1" ]]; then
     cp -a "$BACKUP_DIR/original/public/themes/pahri" "$PANEL_DIR/public/themes/pahri"
 fi
 
-WEB_USER="${WEB_USER:-$(stat -c '%U' "$PANEL_DIR/storage")}"
+WEB_USER="${WEB_USER:-$(stat -c '%U' "$PANEL_DIR/storage")}" 
 if id "$WEB_USER" >/dev/null 2>&1 && [[ "$WEB_USER" != "root" ]]; then
     (cd "$PANEL_DIR" && runuser -u "$WEB_USER" -- php artisan optimize:clear)
 else
