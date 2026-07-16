@@ -28,13 +28,14 @@ run_local_installer() {
     [[ -d "$root/source" ]] || die "Folder source tidak dijumpai dalam pakej tema."
     [[ -f "$root/files/public/themes/pahri/thema-new.js" ]] || die "Runtime Pahri Thema New tidak dijumpai."
     [[ -f "$root/source/resources/scripts/components/PahriBroadcast.tsx" ]] || die "Komponen Broadcast Center tidak dijumpai."
+    [[ -f "$root/source/resources/scripts/components/PahriMaintenanceGate.tsx" ]] || die "Komponen Maintenance Guard tidak dijumpai."
     [[ -f "$root/source/resources/scripts/components/PahriNexusDock.tsx" ]] || die "Komponen Nexus Dock tidak dijumpai."
 
     bash "$root/scripts/install-local.sh"
     bash "$root/scripts/install-v2.sh"
     bash "$root/scripts/install-source.sh"
 
-    local version="6.0.0"
+    local version="6.1.0"
     if [[ -f "$root/VERSION" ]]; then
         version="$(tr -d '[:space:]' < "$root/VERSION")"
     fi
@@ -42,8 +43,8 @@ run_local_installer() {
     printf '\n'
     ok "Pahri Thema New ${version} berjaya dipasang sepenuhnya."
     printf 'Admin Studio: /admin/settings/appearance\n'
+    printf 'Maintenance Guard: Admin Panel > Settings > Pahri Thema New > Quick Links & Status\n'
     printf 'Command Engine: Ctrl + K\n'
-    printf 'Nexus Dock Studio: Admin Panel > Settings > Pahri Thema New > Quick Links & Status\n'
     printf 'Broadcast Center: Admin Panel > Settings > Pahri Thema New\n'
 }
 
