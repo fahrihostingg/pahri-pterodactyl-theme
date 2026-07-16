@@ -2,6 +2,18 @@ import React from 'react';
 import { ServerContext } from '@/state/server';
 import styled from 'styled-components/macro';
 
+export const FileActionCheckbox = styled.input`
+    && {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        cursor: pointer;
+        accent-color: #22c55e;
+        border-radius: 999px;
+        filter: drop-shadow(0 7px 14px rgba(0,0,0,.25));
+    }
+`;
+
 const Wrapper = styled.label`
     position: absolute;
     left: 0;
