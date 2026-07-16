@@ -15,6 +15,7 @@ import '@/assets/tailwind.css';
 import Spinner from '@/components/elements/Spinner';
 import PahriBroadcast from '@/components/PahriBroadcast';
 import PahriMaintenanceGate from '@/components/PahriMaintenanceGate';
+import PahriNexusDock from '@/components/PahriNexusDock';
 import styled, { keyframes } from 'styled-components/macro';
 
 const DashboardRouter = lazy(() => import(/* webpackChunkName: "dashboard" */ '@/routers/DashboardRouter'));
@@ -78,7 +79,14 @@ const Grain = styled.span`
 const Application = styled.div`
     min-height: 100vh; position: relative; isolation: isolate;
 `;
-const particles = Array.from({ length: 26 }, (_, index) => ({ left: (index * 37 + 11) % 100, delay: (index * 1.73) % 18, duration: 14 + (index % 7) * 2.2, size: 1 + (index % 3) }));
+const particles = Array.from({ length: 34 }, (_, index) => ({ left: (index * 37 + 11) % 100, delay: (index * 1.73) % 18, duration: 14 + (index % 7) * 2.2, size: 1 + (index % 3) }));
+
+class PahriSafeBoundary extends React.Component<{ children: React.ReactNode }, { failed: boolean }> {
+    state = { failed: false };
+    static getDerivedStateFromError() { return { failed: true }; }
+    componentDidCatch() { this.setState({ failed: true }); }
+    render() { return this.state.failed ? null : this.props.children; }
+}
 
 interface ExtendedWindow extends Window {
     SiteConfiguration?: SiteSettings;
@@ -125,9 +133,9 @@ const App = () => {
             <GlobalStylesheet />
             <Scene aria-hidden={'true'}>
                 <Aurora $primary /><Aurora /><CursorAura />
-                <Shape $size={210} $top={'7%'} $left={'78%'} $delay={'-2s'} />
-                <Shape $size={128} $top={'64%'} $left={'6%'} $delay={'-8s'} />
-                <Shape $size={78} $top={'42%'} $left={'59%'} $delay={'-13s'} />
+                <Shape $size={230} $top={'7%'} $left={'78%'} $delay={'-2s'} />
+                <Shape $size={138} $top={'64%'} $left={'6%'} $delay={'-8s'} />
+                <Shape $size={88} $top={'42%'} $left={'59%'} $delay={'-13s'} />
                 {particles.map((particle, index) => <Particle key={index} $left={particle.left} $delay={particle.delay} $duration={particle.duration} $size={particle.size} />)}
                 <Grain />
             </Scene>
@@ -144,6 +152,9 @@ const App = () => {
                                 <AuthenticatedRoute path={'/'}><Spinner.Suspense><DashboardRouter /></Spinner.Suspense></AuthenticatedRoute>
                                 <Route path={'*'}><NotFound /></Route>
                             </Switch>
+                            <PahriSafeBoundary>
+                                <PahriNexusDock authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)} />
+                            </PahriSafeBoundary>
                         </Router>
                     </Application>
                 </PahriMaintenanceGate>
