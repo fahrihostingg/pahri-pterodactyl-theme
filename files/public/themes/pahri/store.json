@@ -1,0 +1,13 @@
+{
+  "store_name": "Pahri Panel Store",
+  "currency": "IDR",
+  "qris_provider": "qris.zakki.store",
+  "qris_status": "backend_token_required",
+  "safe_mode": true,
+  "note": "Do not put QRIS secret tokens in frontend files. Use a backend proxy/controller before enabling live auto-payment.",
+  "plans": [
+    { "id": "starter-1gb", "name": "Starter Panel", "ram_gb": 1, "price": 5000, "description": "Untuk bot ringan dan testing." },
+    { "id": "prime-4gb", "name": "Prime Panel", "ram_gb": 4, "price": 15000, "description": "Plan paling seimbang untuk bot aktif." },
+    { "id": "ultra-8gb", "name": "Ultra Panel", "ram_gb": 8, "price": 30000, "description": "Untuk workload berat dan premium user." }
+  ]
+}
