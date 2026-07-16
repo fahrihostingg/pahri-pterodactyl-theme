@@ -9,9 +9,10 @@
         ['Aurelia Control', 'Nexus Control'],
         ['Luxury Spatial Control', 'Nexus Spatial Operating Theme'],
         ['All Aurelia core systems operational', 'All Nexus core systems operational'],
-        ['Version 4.0 • by Pahri', 'Version 6.1 • by Pahri'],
-        ['Version 5.0 • by Pahri', 'Version 6.1 • by Pahri'],
-        ['Version 6.0 • by Pahri', 'Version 6.1 • by Pahri'],
+        ['Version 4.0 • by Pahri', 'Version 6.2 • by Pahri'],
+        ['Version 5.0 • by Pahri', 'Version 6.2 • by Pahri'],
+        ['Version 6.0 • by Pahri', 'Version 6.2 • by Pahri'],
+        ['Version 6.1 • by Pahri', 'Version 6.2 • by Pahri'],
     ]);
 
     const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({
@@ -60,19 +61,26 @@
             title: 'Panel sedang maintenance',
             message: 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.'
         }, config.maintenance || {});
+        const drill = Object.assign({
+            enabled: false,
+            badge: 'Security Drill',
+            title: 'Security Lockdown Simulation',
+            message: 'Panel sedang berada dalam mod simulasi keselamatan. Ini bukan serangan sebenar.',
+            terminal: '[SIMULATION MODE]\n> scanning interface...\n> locking client access...\n> root user id 1 bypass enabled...\n> system guarded by Pahri Thema New'
+        }, config.security_drill || {});
 
         const studio = document.createElement('div');
         studio.id = 'pahri-dock-studio';
         studio.className = 'callout callout-info';
         studio.innerHTML = `
             <h4><i class="fa fa-shield"></i> Maintenance Guard</h4>
-            <p>Kalau ON, client biasa akan dikunci pada halaman maintenance. Root admin masih boleh akses panel dan Admin Panel.</p>
+            <p>Kalau ON, user biasa dikunci pada halaman maintenance. Hanya user ID 1 boleh bypass dan akses panel.</p>
             <div class="checkbox pahri-checkbox">
                 <label>
                     <input type="hidden" name="maintenance_enabled" value="0">
                     <input class="pahri-checkbox-input" type="checkbox" name="maintenance_enabled" value="1" ${maintenance.enabled ? 'checked' : ''}>
                     <span class="pahri-checkbox-ui" aria-hidden="true"></span>
-                    <span class="pahri-checkbox-label">Aktifkan maintenance mode — hanya root admin boleh akses</span>
+                    <span class="pahri-checkbox-label">Aktifkan maintenance mode — hanya user ID 1 boleh akses</span>
                 </label>
             </div>
             <div class="row">
@@ -88,6 +96,35 @@
             <div class="form-group">
                 <label>Maintenance Message</label>
                 <textarea name="maintenance_message" class="form-control" rows="3" maxlength="1000" placeholder="Mesej untuk user biasa...">${escapeHtml(maintenance.message)}</textarea>
+            </div>
+            <hr style="border-color: rgba(255,255,255,.12);">
+            <h4><i class="fa fa-terminal"></i> Security Drill / Fake Hacking Mode</h4>
+            <p>Mode acah-acah security lockdown untuk client biasa. Ini hanya simulasi visual, bukan hacking sebenar. User ID 1 tetap boleh akses.</p>
+            <div class="checkbox pahri-checkbox">
+                <label>
+                    <input type="hidden" name="security_drill_enabled" value="0">
+                    <input class="pahri-checkbox-input" type="checkbox" name="security_drill_enabled" value="1" ${drill.enabled ? 'checked' : ''}>
+                    <span class="pahri-checkbox-ui" aria-hidden="true"></span>
+                    <span class="pahri-checkbox-label">Aktifkan Security Drill / Fake Hacking Mode</span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Security Badge</label>
+                    <input type="text" name="security_drill_badge" class="form-control" maxlength="40" value="${escapeHtml(drill.badge)}">
+                </div>
+                <div class="form-group col-md-8">
+                    <label>Security Title</label>
+                    <input type="text" name="security_drill_title" class="form-control" maxlength="120" value="${escapeHtml(drill.title)}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Security Message</label>
+                <textarea name="security_drill_message" class="form-control" rows="3" maxlength="1000">${escapeHtml(drill.message)}</textarea>
+            </div>
+            <div class="form-group">
+                <label>Terminal Text</label>
+                <textarea name="security_drill_terminal" class="form-control" rows="5" maxlength="1500">${escapeHtml(drill.terminal)}</textarea>
             </div>
             <hr style="border-color: rgba(255,255,255,.12);">
             <h4><i class="fa fa-rocket"></i> Nexus Dock Studio</h4>
