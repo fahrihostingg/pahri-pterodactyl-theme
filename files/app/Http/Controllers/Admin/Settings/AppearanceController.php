@@ -13,14 +13,19 @@ use RuntimeException;
 class AppearanceController extends Controller
 {
     private const THEME_DIRECTORY = 'themes/pahri';
+    private const OWNER_USER_ID = 1;
 
     public function __construct(private AlertsMessageBag $alert)
     {
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('admin.settings.appearance', ['settings' => $this->readSettings()]);
+        $settings = $this->readSettings();
+        $settings['owner_store'] = $this->ownerStoreStatus();
+        $settings['is_owner_user'] = (int) ($request->user()?->id ?? 0) === self::OWNER_USER_ID;
+
+        return view('admin.settings.appearance', ['settings' => $settings]);
     }
 
     public function update(Request $request): RedirectResponse
@@ -68,6 +73,15 @@ class AppearanceController extends Controller
             'security_drill_message' => ['nullable', 'string', 'max:1000'],
             'security_drill_terminal' => ['nullable', 'string', 'max:1500'],
 
+            'store_enabled' => ['nullable', 'boolean'],
+            'store_name' => ['nullable', 'string', 'max:80'],
+            'store_currency' => ['nullable', 'in:IDR,MYR,USD'],
+            'store_whatsapp' => ['nullable', 'string', 'max:40'],
+            'store_qris_endpoint' => ['nullable', 'string', 'max:500', 'regex:/^https?:\/\/[^\s]+$/'],
+            'store_qris_merchant_id' => ['nullable', 'string', 'max:120'],
+            'store_qris_api_key' => ['nullable', 'string', 'max:2000'],
+            'store_qris_clear_key' => ['nullable', 'boolean'],
+
             'quick_link_label_1' => ['nullable', 'string', 'max:40'],
             'quick_link_url_1' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
             'quick_link_label_2' => ['nullable', 'string', 'max:40'],
@@ -76,9 +90,12 @@ class AppearanceController extends Controller
             'quick_link_url_3' => ['nullable', 'string', 'max:500', 'regex:/^(https?:\/\/|\/)[^\s]+$/'],
         ]);
 
-        $settings = array_merge($this->defaults(), $this->readSettings(), [
+        $existing = $this->readSettings();
+        $isOwner = (int) ($request->user()?->id ?? 0) === self::OWNER_USER_ID;
+
+        $settings = array_merge($this->defaults(), $existing, [
             'theme_name' => 'Pahri Thema New',
-            'theme_version' => '6.2.0',
+            'theme_version' => '6.4.1',
             'preset' => $validated['preset'],
             'accent' => strtolower($validated['accent']),
             'accent_secondary' => strtolower($validated['accent_secondary']),
@@ -120,22 +137,39 @@ class AppearanceController extends Controller
             ],
             'maintenance' => [
                 'enabled' => $request->boolean('maintenance_enabled'),
-                'access_user_id' => 1,
+                'access_user_id' => self::OWNER_USER_ID,
                 'badge' => trim((string) ($validated['maintenance_badge'] ?? 'Maintenance Mode')),
                 'title' => trim((string) ($validated['maintenance_title'] ?? 'Panel sedang maintenance')),
                 'message' => trim((string) ($validated['maintenance_message'] ?? 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.')),
             ],
             'security_drill' => [
                 'enabled' => $request->boolean('security_drill_enabled'),
-                'access_user_id' => 1,
-                'badge' => trim((string) ($validated['security_drill_badge'] ?? 'Security Drill')),
-                'title' => trim((string) ($validated['security_drill_title'] ?? 'Security Lockdown Simulation')),
-                'message' => trim((string) ($validated['security_drill_message'] ?? 'Panel sedang berada dalam mod simulasi keselamatan. Ini bukan serangan sebenar.')),
-                'terminal' => trim((string) ($validated['security_drill_terminal'] ?? "[SIMULATION MODE]\n> scanning interface...\n> locking client access...\n> root user id 1 bypass enabled...\n> system guarded by Pahri Thema New")),
+                'access_user_id' => self::OWNER_USER_ID,
+                'badge' => trim((string) ($validated['security_drill_badge'] ?? 'UI Breach Simulation')),
+                'title' => trim((string) ($validated['security_drill_title'] ?? 'Tema sedang hancur / glitch')),
+                'message' => trim((string) ($validated['security_drill_message'] ?? 'User masih boleh akses panel, tetapi UI dipaparkan seolah-olah sedang diganggu. Ini cuma simulasi visual.')),
+                'terminal' => trim((string) ($validated['security_drill_terminal'] ?? "[VISUAL SIMULATION]\n> interface corruption injected...\n> no real exploit executed\n> users can still access panel\n> owner user id 1 bypass enabled")),
             ],
             'quick_links' => $this->quickLinks($validated),
             'updated_at' => now()->toIso8601String(),
         ]);
+
+        if ($isOwner) {
+            $settings['store'] = array_merge($this->defaults()['store'], is_array($existing['store'] ?? null) ? $existing['store'] : [], [
+                'enabled' => $request->boolean('store_enabled'),
+                'store_name' => trim((string) ($validated['store_name'] ?? 'Pahri Panel Store')),
+                'currency' => $validated['store_currency'] ?? 'IDR',
+                'whatsapp' => trim((string) ($validated['store_whatsapp'] ?? '')),
+                'qris_provider' => 'qris.zakki.store',
+                'qris_endpoint' => trim((string) ($validated['store_qris_endpoint'] ?? 'https://qris.zakki.store')),
+                'qris_merchant_id' => trim((string) ($validated['store_qris_merchant_id'] ?? '')),
+                'qris_status' => 'secret_saved_in_storage',
+                'safe_mode' => true,
+            ]);
+            $this->writeStoreSecrets($validated, $request);
+        } else {
+            $settings['store'] = is_array($existing['store'] ?? null) ? $existing['store'] : $this->defaults()['store'];
+        }
 
         File::ensureDirectoryExists($this->themePath('uploads'), 0755, true);
 
@@ -147,9 +181,10 @@ class AppearanceController extends Controller
         }
 
         $this->writeSettings($settings);
+        $this->writeStorePublicConfig($settings);
         $this->writeCustomCss($settings);
 
-        $this->alert->success('Pahri Thema New 6.2 berjaya dikemas kini. Checkbox, Maintenance Guard dan Security Drill telah digunakan.')->flash();
+        $this->alert->success('Pahri Thema New 6.4.1 berjaya dikemas kini. File Manager, Store dan Owner QRIS telah digunakan.')->flash();
         return redirect()->route('admin.settings.appearance');
     }
 
@@ -157,7 +192,7 @@ class AppearanceController extends Controller
     {
         return [
             'theme_name' => 'Pahri Thema New',
-            'theme_version' => '6.2.0',
+            'theme_version' => '6.4.1',
             'preset' => 'obsidian',
             'accent' => '#a855f7',
             'accent_secondary' => '#22d3ee',
@@ -177,10 +212,26 @@ class AppearanceController extends Controller
                 'active' => false, 'support_label' => 'Support', 'support_url' => '/account', 'spotlight_title' => 'Nexus Dock Active', 'spotlight_message' => 'Quick actions, live time, support and custom links are ready from one floating dock.',
             ],
             'maintenance' => [
-                'enabled' => false, 'access_user_id' => 1, 'badge' => 'Maintenance Mode', 'title' => 'Panel sedang maintenance', 'message' => 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.',
+                'enabled' => false, 'access_user_id' => self::OWNER_USER_ID, 'badge' => 'Maintenance Mode', 'title' => 'Panel sedang maintenance', 'message' => 'Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi.',
             ],
             'security_drill' => [
-                'enabled' => false, 'access_user_id' => 1, 'badge' => 'Security Drill', 'title' => 'Security Lockdown Simulation', 'message' => 'Panel sedang berada dalam mod simulasi keselamatan. Ini bukan serangan sebenar.', 'terminal' => "[SIMULATION MODE]\n> scanning interface...\n> locking client access...\n> root user id 1 bypass enabled...\n> system guarded by Pahri Thema New",
+                'enabled' => false, 'access_user_id' => self::OWNER_USER_ID, 'badge' => 'UI Breach Simulation', 'title' => 'Tema sedang hancur / glitch', 'message' => 'User masih boleh akses panel, tetapi UI dipaparkan seolah-olah sedang diganggu. Ini cuma simulasi visual.', 'terminal' => "[VISUAL SIMULATION]\n> interface corruption injected...\n> no real exploit executed\n> users can still access panel\n> owner user id 1 bypass enabled",
+            ],
+            'store' => [
+                'enabled' => false,
+                'store_name' => 'Pahri Panel Store',
+                'currency' => 'IDR',
+                'whatsapp' => '',
+                'qris_provider' => 'qris.zakki.store',
+                'qris_endpoint' => 'https://qris.zakki.store',
+                'qris_merchant_id' => '',
+                'qris_status' => 'backend_token_required',
+                'safe_mode' => true,
+                'plans' => [
+                    ['id' => 'starter-1gb', 'name' => 'Starter Panel', 'ram_gb' => 1, 'price' => 5000, 'description' => 'Untuk bot ringan dan testing.'],
+                    ['id' => 'prime-4gb', 'name' => 'Prime Panel', 'ram_gb' => 4, 'price' => 15000, 'description' => 'Plan paling seimbang untuk bot aktif.'],
+                    ['id' => 'ultra-8gb', 'name' => 'Ultra Panel', 'ram_gb' => 8, 'price' => 30000, 'description' => 'Untuk workload berat dan premium user.'],
+                ],
             ],
             'quick_links' => [],
             'updated_at' => null,
@@ -199,6 +250,7 @@ class AppearanceController extends Controller
         $settings['dock'] = array_merge($defaults['dock'], is_array($decoded['dock'] ?? null) ? $decoded['dock'] : []);
         $settings['maintenance'] = array_merge($defaults['maintenance'], is_array($decoded['maintenance'] ?? null) ? $decoded['maintenance'] : []);
         $settings['security_drill'] = array_merge($defaults['security_drill'], is_array($decoded['security_drill'] ?? null) ? $decoded['security_drill'] : []);
+        $settings['store'] = array_merge($defaults['store'], is_array($decoded['store'] ?? null) ? $decoded['store'] : []);
         $settings['quick_links'] = is_array($decoded['quick_links'] ?? null) ? $decoded['quick_links'] : [];
         return $settings;
     }
@@ -212,6 +264,53 @@ class AppearanceController extends Controller
             if ($label !== '' && $url !== '') $links[] = ['label' => $label, 'url' => $url];
         }
         return $links;
+    }
+
+    private function writeStoreSecrets(array $validated, Request $request): void
+    {
+        $path = storage_path('app/pahri-store-secrets.json');
+        $existing = [];
+        if (File::exists($path)) {
+            $decoded = json_decode((string) File::get($path), true);
+            if (is_array($decoded)) $existing = $decoded;
+        }
+
+        if ($request->boolean('store_qris_clear_key')) {
+            unset($existing['qris_api_key']);
+        }
+
+        $apiKey = trim((string) ($validated['store_qris_api_key'] ?? ''));
+        if ($apiKey !== '') {
+            $existing['qris_api_key'] = $apiKey;
+        }
+
+        $existing['qris_endpoint'] = trim((string) ($validated['store_qris_endpoint'] ?? 'https://qris.zakki.store'));
+        $existing['qris_merchant_id'] = trim((string) ($validated['store_qris_merchant_id'] ?? ''));
+        $existing['updated_at'] = now()->toIso8601String();
+
+        File::put($path, json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL, true);
+        @chmod($path, 0640);
+    }
+
+    private function ownerStoreStatus(): array
+    {
+        $path = storage_path('app/pahri-store-secrets.json');
+        if (!File::exists($path)) {
+            return ['has_api_key' => false, 'updated_at' => null];
+        }
+
+        $decoded = json_decode((string) File::get($path), true);
+        return [
+            'has_api_key' => is_array($decoded) && !empty($decoded['qris_api_key']),
+            'updated_at' => is_array($decoded) ? ($decoded['updated_at'] ?? null) : null,
+        ];
+    }
+
+    private function writeStorePublicConfig(array $settings): void
+    {
+        $store = $settings['store'] ?? $this->defaults()['store'];
+        unset($store['qris_api_key']);
+        File::put($this->themePath('store.json'), json_encode($store, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL, true);
     }
 
     private function writeSettings(array $settings): void
