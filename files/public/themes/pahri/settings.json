@@ -1,6 +1,6 @@
 {
     "theme_name": "Pahri Thema New",
-    "theme_version": "6.2.0",
+    "theme_version": "6.3.0",
     "preset": "obsidian",
     "accent": "#a855f7",
     "accent_secondary": "#22d3ee",
@@ -44,10 +44,10 @@
     "security_drill": {
         "enabled": false,
         "access_user_id": 1,
-        "badge": "Security Drill",
-        "title": "Security Lockdown Simulation",
-        "message": "Panel sedang berada dalam mod simulasi keselamatan. Ini bukan serangan sebenar.",
-        "terminal": "[SIMULATION MODE]\n> scanning interface...\n> locking client access...\n> root user id 1 bypass enabled...\n> system guarded by Pahri Thema New"
+        "badge": "Visual Breach Simulation",
+        "title": "Interface Corrupted Simulation",
+        "message": "User masih boleh akses panel, tapi tema akan nampak hancur/glitch seperti sedang diganggu. Ini hanya simulasi visual.",
+        "terminal": "[VISUAL SIMULATION MODE]\n> interface distortion enabled\n> client access remains open\n> UI integrity: unstable\n> admin bypass: user id 1\n> no real exploit executed"
     },
     "quick_links": [],
     "updated_at": null
