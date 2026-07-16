@@ -83,12 +83,14 @@ const particles = Array.from({ length: 26 }, (_, index) => ({ left: (index * 37 
 interface ExtendedWindow extends Window {
     SiteConfiguration?: SiteSettings;
     PterodactylUser?: { uuid: string; username: string; email: string; root_admin: boolean; use_totp: boolean; language: string; updated_at: string; created_at: string };
+    PahriUserId?: number;
 }
 
 setupInterceptors(history);
 
 const App = () => {
-    const { PterodactylUser, SiteConfiguration } = window as ExtendedWindow;
+    const { PterodactylUser, SiteConfiguration, PahriUserId } = window as ExtendedWindow;
+    const canBypassMaintenance = Number(PahriUserId || 0) === 1;
 
     useEffect(() => {
         let frame = 0;
@@ -131,7 +133,7 @@ const App = () => {
             </Scene>
             <StoreProvider store={store}>
                 <ProgressBar />
-                <PahriMaintenanceGate authenticated={Boolean(PterodactylUser)} rootAdmin={Boolean(PterodactylUser?.root_admin)}>
+                <PahriMaintenanceGate authenticated={Boolean(PterodactylUser)} canBypass={canBypassMaintenance}>
                     <Application>
                         <Router history={history}>
                             <Switch>
