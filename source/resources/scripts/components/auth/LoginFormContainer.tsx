@@ -19,11 +19,11 @@ const pulse = keyframes`
 `;
 
 const Root = styled.div`
-    width: min(1220px, calc(100vw - 28px));
-    min-height: 720px;
+    width: min(1280px, calc(100vw - 28px));
+    min-height: 760px;
     margin: 24px auto;
     display: grid;
-    grid-template-columns: minmax(0, 1.18fr) minmax(390px, .82fr);
+    grid-template-columns: minmax(0, 1.25fr) minmax(390px, .75fr);
     overflow: hidden;
     position: relative;
     border: 1px solid rgba(255,255,255,.115);
@@ -42,7 +42,7 @@ const Root = styled.div`
         background: linear-gradient(135deg, rgba(255,255,255,.055), transparent 35%, rgba(255,255,255,.018));
     }
 
-    @media (max-width: 920px) {
+    @media (max-width: 980px) {
         grid-template-columns: 1fr;
         min-height: auto;
         margin: 12px auto;
@@ -51,8 +51,8 @@ const Root = styled.div`
 `;
 
 const Visual = styled.section`
-    min-height: 720px;
-    padding: 58px;
+    min-height: 760px;
+    padding: 46px;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -82,11 +82,11 @@ const Visual = styled.section`
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, transparent 70%, rgba(2,6,23,.64));
+        background: linear-gradient(90deg, transparent 72%, rgba(2,6,23,.62));
     }
 
-    @media (max-width: 920px) {
-        min-height: 390px;
+    @media (max-width: 980px) {
+        min-height: auto;
         padding: 34px;
     }
 `;
@@ -114,7 +114,6 @@ const Logo = styled.div`
 
 const Product = styled.div`
     color: #fff;
-
     strong { display: block; font-size: 18px; font-weight: 880; letter-spacing: -.035em; }
     span { display: block; margin-top: 4px; color: rgba(226,232,240,.48); font-size: 8px; font-weight: 850; letter-spacing: .18em; text-transform: uppercase; }
 `;
@@ -122,7 +121,8 @@ const Product = styled.div`
 const Hero = styled.div`
     position: relative;
     z-index: 5;
-    max-width: 610px;
+    max-width: 680px;
+    margin-top: 34px;
 
     small {
         display: inline-flex;
@@ -149,28 +149,88 @@ const Hero = styled.div`
     }
 
     h1 {
-        margin: 20px 0 14px;
+        margin: 18px 0 13px;
         color: #fff;
-        font-size: clamp(46px, 5.6vw, 82px);
-        line-height: .91;
+        font-size: clamp(44px, 5.3vw, 78px);
+        line-height: .92;
         letter-spacing: -.072em;
         text-wrap: balance;
     }
 
     h1 span {
         color: transparent;
-        background: linear-gradient(100deg, #fff, #ddd6fe 42%, #67e8f9);
+        background: linear-gradient(100deg, #fff, #fde68a 35%, #67e8f9);
         background-clip: text;
         -webkit-background-clip: text;
     }
 
     p {
-        max-width: 540px;
+        max-width: 600px;
         margin: 0;
-        color: rgba(226,232,240,.58);
+        color: rgba(226,232,240,.62);
         font-size: 14px;
         line-height: 1.85;
     }
+`;
+
+const StoreGrid = styled.div`
+    position: relative;
+    z-index: 5;
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+
+    @media (max-width: 1180px) { grid-template-columns: 1fr; }
+`;
+
+const Plan = styled.div`
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: calc(var(--pahri-radius, 24px) * .7);
+    background: rgba(5,9,23,.58);
+    box-shadow: inset 0 1px rgba(255,255,255,.06), 0 16px 45px rgba(0,0,0,.24);
+    backdrop-filter: blur(var(--pahri-blur, 24px));
+
+    &::before {
+        content: '';
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        right: -50px;
+        top: -52px;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--pahri-accent) 18%, transparent);
+        filter: blur(18px);
+    }
+
+    strong { display:block; position:relative; color:#fff; font-size:16px; font-weight:850; letter-spacing:-.035em; }
+    span { display:block; position:relative; margin-top:6px; color:#fde68a; font-size:20px; font-weight:900; letter-spacing:-.04em; }
+    small { display:block; position:relative; margin-top:4px; color:rgba(226,232,240,.48); font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+`;
+
+const FeatureStrip = styled.div`
+    position: relative;
+    z-index: 5;
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+
+    @media (max-width: 760px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+`;
+
+const Feature = styled.div`
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 13px;
+    color: rgba(241,245,249,.78);
+    background: rgba(255,255,255,.035);
+    font-size: 10px;
+    font-weight: 800;
+    text-align: center;
 `;
 
 const Scene = styled.div`
@@ -206,7 +266,6 @@ const Orbital = styled.div`
     top: 22%;
     display: grid;
     place-items: center;
-
     @media (max-width: 1100px) { opacity: .56; transform: scale(.78); right: 1%; }
 `;
 
@@ -326,6 +385,8 @@ type Props = React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, 
     title?: string;
 };
 
+const features = ['150+ fitur', 'QRIS ready', 'Auto order flow', 'Panel RAM plans'];
+
 export default forwardRef<HTMLFormElement, Props>(({ title, ...props }, ref) => (
     <Root>
         <Visual>
@@ -337,22 +398,28 @@ export default forwardRef<HTMLFormElement, Props>(({ title, ...props }, ref) => 
             </Scene>
             <Brand>
                 <Logo />
-                <Product><strong>Pahri Aurelia</strong><span>Luxury Spatial Control</span></Product>
+                <Product><strong>Pahri Panel Store</strong><span>Nexus Storefront + Control Panel</span></Product>
             </Brand>
             <Hero>
-                <small>Private Cloud Experience</small>
-                <h1>Control beyond<br /><span>the ordinary.</span></h1>
-                <p>A cinematic control environment engineered for speed, security and total command over every server.</p>
+                <small>Automated Panel Store</small>
+                <h1>Beli panel ikut RAM,<br /><span>urus semua dari satu tempat.</span></h1>
+                <p>Landing pertama kini bergaya store: pilih plan RAM, sambung payment QRIS, aktifkan broadcast, maintenance, fake hacking visual, quick links dan feature hub tanpa rosakkan panel.</p>
             </Hero>
-            <Status>All Aurelia core systems operational</Status>
+            <StoreGrid>
+                <Plan><strong>Starter Panel</strong><span>1 GB RAM</span><small>Untuk bot ringan</small></Plan>
+                <Plan><strong>Prime Panel</strong><span>4 GB RAM</span><small>Best seller</small></Plan>
+                <Plan><strong>Ultra Panel</strong><span>8 GB RAM</span><small>High performance</small></Plan>
+            </StoreGrid>
+            <FeatureStrip>{features.map(item => <Feature key={item}>{item}</Feature>)}</FeatureStrip>
+            <Status>QRIS integration bridge ready • token set from backend only</Status>
         </Visual>
         <Panel>
             <FormArea>
                 <h2>{title || 'Secure Access'}</h2>
-                <p className={'pahri-auth-subtitle'}>Enter the Aurelia control environment using your protected account.</p>
+                <p className={'pahri-auth-subtitle'}>Login admin untuk aktifkan store, QRIS, maintenance, broadcast dan 150+ feature hub.</p>
                 <FlashMessageRender css={undefined} />
                 <Form {...props} ref={ref}>{props.children}</Form>
-                <Foot>&copy; {new Date().getFullYear()} Pahri Aurelia &mdash; Crafted by Pahri</Foot>
+                <Foot>&copy; {new Date().getFullYear()} Pahri Thema New Store &mdash; Crafted by Pahri</Foot>
             </FormArea>
         </Panel>
     </Root>
