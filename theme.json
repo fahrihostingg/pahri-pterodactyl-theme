@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.4.0",
-  "codename": "Storefront Feature Hub",
+  "version": "6.4.1",
+  "codename": "Storefront Owner QRIS Hotfix",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -16,8 +16,11 @@
     "interactive server cards",
     "single custom toggle per feature",
     "file manager green selected tick",
+    "FileActionCheckbox compatibility fix",
     "store landing page",
     "safe qris store config",
+    "owner-only QRIS secret editor",
+    "QRIS token stored outside public folder",
     "150 feature hub runtime list",
     "maintenance access control",
     "visual security simulation"
