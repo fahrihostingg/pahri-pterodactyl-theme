@@ -1,6 +1,6 @@
 {
     "theme_name": "Pahri Thema New",
-    "theme_version": "6.0.0",
+    "theme_version": "6.1.0",
     "preset": "obsidian",
     "accent": "#a855f7",
     "accent_secondary": "#22d3ee",
@@ -28,11 +28,17 @@
         "revision": "initial"
     },
     "dock": {
-        "active": true,
+        "active": false,
         "support_label": "Support",
         "support_url": "/account",
         "spotlight_title": "Nexus Dock Active",
         "spotlight_message": "Quick actions, live time, support and custom links are ready from one floating dock."
+    },
+    "maintenance": {
+        "enabled": false,
+        "badge": "Maintenance Mode",
+        "title": "Panel sedang maintenance",
+        "message": "Panel sedang dikemas kini oleh admin. Sila cuba semula sebentar lagi."
     },
     "quick_links": [],
     "updated_at": null
