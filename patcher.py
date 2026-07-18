@@ -18,6 +18,24 @@ def atomic_write(path: Path, content: str) -> None:
     os.replace(temporary, path)
 
 
+def patch_base_routes(text: str) -> str:
+    if "pahri.store.index" in text:
+        return text
+
+    old = "Route::get('/', [Base\\IndexController::class, 'index'])->name('index')->fallback();"
+    new = (
+        "Route::get('/dashboard', [Base\\IndexController::class, 'index'])->name('index');\n"
+        "Route::get('/', fn () => view('pahri.store'))\n"
+        "    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])\n"
+        "    ->name('pahri.store.index');"
+    )
+
+    if old not in text:
+        fail("Route root asal Pterodactyl tidak dijumpai dalam routes/base.php.")
+
+    return text.replace(old, new, 1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Patch Pterodactyl v1.14.x for Pahri Thema New")
     parser.add_argument("--panel", required=True, help="Pterodactyl panel directory")
@@ -27,6 +45,7 @@ def main() -> None:
 
     files = {
         "routes": panel / "routes/admin.php",
+        "base_routes": panel / "routes/base.php",
         "admin_layout": panel / "resources/views/layouts/admin.blade.php",
         "wrapper": panel / "resources/views/templates/wrapper.blade.php",
         "settings_nav": panel / "resources/views/partials/admin/settings/nav.blade.php",
@@ -38,6 +57,8 @@ def main() -> None:
 
     original = {label: path.read_text(encoding="utf-8") for label, path in files.items()}
     source = dict(original)
+
+    source["base_routes"] = patch_base_routes(source["base_routes"])
 
     # Migrate visible labels from older Pahri releases.
     source["settings_nav"] = source["settings_nav"].replace("> Pahri Theme</a>", "> Pahri Thema New</a>")
@@ -85,7 +106,7 @@ def main() -> None:
                 "            <span class=\"pahri-orb pahri-orb-one\"></span>\n"
                 "            <span class=\"pahri-orb pahri-orb-two\"></span>\n"
                 "        </div>\n"
-                "        <a class=\"pahri-floating-logo\" href=\"{{ route('index') }}\" aria-label=\"Pahri Thema New\"></a>\n"
+                "        <a class=\"pahri-floating-logo\" href=\"/dashboard\" aria-label=\"Pahri Thema New\"></a>\n"
                 "        <div class=\"pahri-watermark\" aria-hidden=\"true\">by Pahri</div>",
                 "pahri-client-theme",
             ),
