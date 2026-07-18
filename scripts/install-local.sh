@@ -20,6 +20,7 @@ die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 
 REQUIRED_FILES=(
     "routes/admin.php"
+    "routes/base.php"
     "resources/views/layouts/admin.blade.php"
     "resources/views/templates/wrapper.blade.php"
     "resources/views/partials/admin/settings/nav.blade.php"
@@ -81,6 +82,13 @@ restore_from_backup() {
             rm -f "$PANEL_DIR/resources/views/admin/settings/appearance.blade.php"
         fi
 
+        if [[ "${HAD_STORE_VIEW:-0}" == "1" ]]; then
+            install -D -m 0644 "$BACKUP_DIR/original/resources/views/pahri/store.blade.php" \
+                "$PANEL_DIR/resources/views/pahri/store.blade.php"
+        else
+            rm -f "$PANEL_DIR/resources/views/pahri/store.blade.php"
+        fi
+
         if [[ "${HAD_THEME:-0}" == "1" ]]; then
             rm -rf "$PANEL_DIR/public/themes/pahri"
             mkdir -p "$PANEL_DIR/public/themes"
@@ -114,6 +122,7 @@ if [[ $ALREADY_INSTALLED -eq 0 ]]; then
 
     HAD_CONTROLLER=0
     HAD_VIEW=0
+    HAD_STORE_VIEW=0
     HAD_THEME=0
 
     if [[ -f "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php" ]]; then
@@ -128,6 +137,12 @@ if [[ $ALREADY_INSTALLED -eq 0 ]]; then
             "$BACKUP_DIR/original/resources/views/admin/settings/appearance.blade.php"
     fi
 
+    if [[ -f "$PANEL_DIR/resources/views/pahri/store.blade.php" ]]; then
+        HAD_STORE_VIEW=1
+        install -D -m 0644 "$PANEL_DIR/resources/views/pahri/store.blade.php" \
+            "$BACKUP_DIR/original/resources/views/pahri/store.blade.php"
+    fi
+
     if [[ -d "$PANEL_DIR/public/themes/pahri" ]]; then
         HAD_THEME=1
         mkdir -p "$BACKUP_DIR/original/public/themes"
@@ -137,17 +152,20 @@ if [[ $ALREADY_INSTALLED -eq 0 ]]; then
     cat > "$BACKUP_DIR/meta.env" <<META
 HAD_CONTROLLER=$HAD_CONTROLLER
 HAD_VIEW=$HAD_VIEW
+HAD_STORE_VIEW=$HAD_STORE_VIEW
 HAD_THEME=$HAD_THEME
 META
 
     printf '%s\n' "$BACKUP_DIR" > "$STATE_FILE"
 fi
 
-log "Memasang controller dan halaman admin..."
+log "Memasang controller dan halaman admin/store..."
 install -D -m 0644 "$PACKAGE_DIR/files/app/Http/Controllers/Admin/Settings/AppearanceController.php" \
     "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php"
 install -D -m 0644 "$PACKAGE_DIR/files/resources/views/admin/settings/appearance.blade.php" \
     "$PANEL_DIR/resources/views/admin/settings/appearance.blade.php"
+install -D -m 0644 "$PACKAGE_DIR/files/resources/views/pahri/store.blade.php" \
+    "$PANEL_DIR/resources/views/pahri/store.blade.php"
 
 log "Memasang aset Pahri Theme..."
 mkdir -p "$PANEL_DIR/public/themes/pahri/uploads"
@@ -168,11 +186,15 @@ python3 "$PACKAGE_DIR/patcher.py" --panel "$PANEL_DIR"
 log "Menyemak sintaks PHP..."
 php -l "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php" >/dev/null
 php -l "$PANEL_DIR/routes/admin.php" >/dev/null
+php -l "$PANEL_DIR/routes/base.php" >/dev/null
+php -l "$PANEL_DIR/resources/views/pahri/store.blade.php" >/dev/null
 
 chown "$PANEL_OWNER" \
     "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php" \
     "$PANEL_DIR/resources/views/admin/settings/appearance.blade.php" \
+    "$PANEL_DIR/resources/views/pahri/store.blade.php" \
     "$PANEL_DIR/routes/admin.php" \
+    "$PANEL_DIR/routes/base.php" \
     "$PANEL_DIR/resources/views/layouts/admin.blade.php" \
     "$PANEL_DIR/resources/views/templates/wrapper.blade.php" \
     "$PANEL_DIR/resources/views/partials/admin/settings/nav.blade.php"
@@ -186,6 +208,7 @@ log "Membersihkan cache Laravel..."
     cd "$PANEL_DIR"
     run_artisan optimize:clear
     run_artisan route:list --path=admin/settings/appearance --no-ansi | grep -q "admin.settings.appearance"
+    run_artisan route:list --path=/ --no-ansi | grep -q "pahri.store.index"
 )
 
 if id "$WEB_USER" >/dev/null 2>&1 && [[ "$WEB_USER" != "root" ]]; then
@@ -197,10 +220,12 @@ fi
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Elegant Theme berjaya dipasang."
-printf '\nBuka: Admin Panel > Settings > Pahri Theme\n'
-printf 'URL:   /admin/settings/appearance\n'
-printf 'PHP:   %s | Web user: %s:%s\n' "$PHP_VERSION" "$WEB_USER" "$WEB_GROUP"
+ok "Pahri Store + Admin Theme berjaya dipasang."
+printf '\nRoot Store: /\n'
+printf 'Dashboard:   /dashboard\n'
+printf 'Login:       /auth/login\n'
+printf 'Admin:       /admin/settings/appearance\n'
+printf 'PHP:         %s | Web user: %s:%s\n' "$PHP_VERSION" "$WEB_USER" "$WEB_GROUP"
 if [[ -n "$BACKUP_DIR" ]]; then
-    printf 'Backup: %s\n' "$BACKUP_DIR"
+    printf 'Backup:      %s\n' "$BACKUP_DIR"
 fi
