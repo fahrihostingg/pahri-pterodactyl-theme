@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.7.1",
-  "codename": "Checkout Fail-safe Store",
+  "version": "6.7.3",
+  "codename": "Route Boot Emergency Fix",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -14,6 +14,7 @@
     "server-side QRIS checkout adapter for qris.zakki.store",
     "checkout fail-safe page without 500 on refresh",
     "owner order status controls",
+    "safe string-only public middleware to prevent Laravel route boot 500s",
     "private QRIS token storage outside public folder",
     "order status page and buyer account request flow",
     "owner editable plans, prices, endpoint, merchant id and token",
