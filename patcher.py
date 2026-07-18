@@ -19,17 +19,39 @@ def atomic_write(path: Path, content: str) -> None:
 
 
 def patch_base_routes(text: str) -> str:
-    if 'Pahri\\StoreController' in text and 'pahri.owner' in text:
-        return text
+    legacy_public = "Route::get('/', fn () => view('pahri.store'))\n    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])\n    ->name('pahri.store.index');"
+    if legacy_public in text:
+        text = text.replace(legacy_public, '__PAHRI_STORE_ROUTES__')
 
-    text = text.replace("Route::get('/', fn () => view('pahri.store'))\n    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])\n    ->name('pahri.store.index');", "__PAHRI_STORE_ROUTES__")
-    text = text.replace("Route::get('/dashboard', [Base\\IndexController::class, 'index'])->name('index');\n__PAHRI_STORE_ROUTES__", "__PAHRI_ROOT_BLOCK__")
-    text = text.replace("Route::get('/', [Base\\IndexController::class, 'index'])->name('index')->fallback();", "__PAHRI_ROOT_BLOCK__")
+    legacy_block = "Route::get('/dashboard', [Base\\IndexController::class, 'index'])->name('index');\n__PAHRI_STORE_ROUTES__"
+    if legacy_block in text:
+        text = text.replace(legacy_block, '__PAHRI_ROOT_BLOCK__')
+
+    text = text.replace("Route::get('/', [Base\\IndexController::class, 'index'])->name('index')->fallback();", '__PAHRI_ROOT_BLOCK__')
+
+    if 'Pahri\\StoreController' in text:
+        # Upgrade older Pahri route blocks in place.
+        if "Route::get('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkoutIndex'])" not in text:
+            text = text.replace(
+                "Route::post('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkout'])",
+                "Route::get('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkoutIndex'])\n    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])\n    ->name('pahri.checkout.index');\nRoute::post('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkout'])",
+                1,
+            )
+        if "Route::post('/owner/order/{id}'" not in text:
+            text = text.replace(
+                "Route::post('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOwner'])\n    ->name('pahri.owner.update');",
+                "Route::post('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOwner'])\n    ->name('pahri.owner.update');\nRoute::post('/owner/order/{id}', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOrder'])\n    ->name('pahri.owner.order.update');",
+                1,
+            )
+        return text
 
     block = """Route::get('/dashboard', [Base\\IndexController::class, 'index'])->name('index');
 Route::get('/', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'index'])
     ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])
     ->name('pahri.store.index');
+Route::get('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkoutIndex'])
+    ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])
+    ->name('pahri.checkout.index');
 Route::post('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkout'])
     ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])
     ->name('pahri.checkout');
@@ -42,7 +64,9 @@ Route::post('/order/{id}/account', [\\Pterodactyl\\Http\\Controllers\\Pahri\\Sto
 Route::get('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'owner'])
     ->name('pahri.owner');
 Route::post('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOwner'])
-    ->name('pahri.owner.update');"""
+    ->name('pahri.owner.update');
+Route::post('/owner/order/{id}', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOrder'])
+    ->name('pahri.owner.order.update');"""
 
     if '__PAHRI_ROOT_BLOCK__' not in text:
         fail('Route root asal Pterodactyl tidak dijumpai dalam routes/base.php.')
@@ -89,7 +113,7 @@ def main() -> None:
             ("            {!! Theme::css('css/pterodactyl.css?t={cache-version}') !!}", "            {!! Theme::css('css/pterodactyl.css?t={cache-version}') !!}\n            <link rel=\"stylesheet\" href=\"/themes/pahri/custom.css?v={{ @filemtime(public_path('themes/pahri/custom.css')) ?: 1 }}\">\n            <link rel=\"stylesheet\" href=\"/themes/pahri/admin.css?v={{ @filemtime(public_path('themes/pahri/admin.css')) ?: 1 }}\">", '/themes/pahri/admin.css'),
             ("    <body class=\"hold-transition skin-blue fixed sidebar-mini\">", "    <body class=\"hold-transition skin-blue fixed sidebar-mini pahri-admin-theme\">", 'pahri-admin-theme'),
             ("                    <span>{{ config('app.name', 'Pterodactyl') }}</span>", "                    <span class=\"pahri-admin-logo-mark\" aria-hidden=\"true\"></span>\n                    <span class=\"pahri-admin-logo-text\">{{ config('app.name', 'Pterodactyl') }}</span>", 'pahri-admin-logo-mark'),
-            ("                        <li class=\"{{ ! starts_with(Route::currentRouteName(), 'admin.settings') ?: 'active' }}\">\n                            <a href=\"{{ route('admin.settings')}}\">\n                                <i class=\"fa fa-wrench\"></i> <span>Settings</span>\n                            </a>\n                        </li>", "                        <li class=\"{{ ! starts_with(Route::currentRouteName(), 'admin.settings') ?: 'active' }}\">\n                            <a href=\"{{ route('admin.settings')}}\">\n                                <i class=\"fa fa-wrench\"></i> <span>Settings</span>\n                            </a>\n                        </li>\n                        <li class=\"{{ Route::currentRouteName() !== 'admin.settings.appearance' ?: 'active' }}\"><a href=\"{{ route('admin.settings.appearance') }}\"><i class=\"fa fa-diamond\"></i> <span>Pahri Thema New</span></a></li>\n                        <li class=\"{{ Route::currentRouteName() !== 'pahri.owner' ?: 'active' }}\"><a href=\"/owner\"><i class=\"fa fa-shopping-cart\"></i> <span>Owner Store</span></a></li>", "pahri.owner"),
+            ("                        <li class=\"{{ ! starts_with(Route::currentRouteName(), 'admin.settings') ?: 'active' }}\">\n                            <a href=\"{{ route('admin.settings')}}\">\n                                <i class=\"fa fa-wrench\"></i> <span>Settings</span>\n                            </a>\n                        </li>", "                        <li class=\"{{ ! starts_with(Route::currentRouteName(), 'admin.settings') ?: 'active' }}\">\n                            <a href=\"{{ route('admin.settings')}}\">\n                                <i class=\"fa fa-wrench\"></i> <span>Settings</span>\n                            </a>\n                        </li>\n                        <li class=\"{{ Route::currentRouteName() !== 'admin.settings.appearance' ?: 'active' }}\"><a href=\"{{ route('admin.settings.appearance') }}\"><i class=\"fa fa-diamond\"></i> <span>Pahri Thema New</span></a></li>\n                        <li class=\"{{ Route::currentRouteName() !== 'pahri.owner' ?: 'active' }}\"><a href=\"/owner\"><i class=\"fa fa-shopping-cart\"></i> <span>Owner Store</span></a></li>", 'pahri.owner'),
             ("        <div class=\"wrapper\">", "        <div class=\"pahri-admin-bg\" aria-hidden=\"true\"></div>\n        <div class=\"wrapper\">", 'pahri-admin-bg'),
             ("        @show\n    </body>", "        @show\n        <div class=\"pahri-admin-watermark\" aria-hidden=\"true\">by Pahri</div>\n    </body>", 'pahri-admin-watermark'),
         ],
