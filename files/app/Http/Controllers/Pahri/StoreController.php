@@ -17,10 +17,7 @@ class StoreController extends Controller
 
     public function index(): View
     {
-        return view('pahri.store', [
-            'store' => $this->storeConfig(),
-            'features' => $this->featureHub(),
-        ]);
+        return view('pahri.store', ['store' => $this->storeConfig(), 'features' => $this->featureHub()]);
     }
 
     public function checkout(Request $request): View|RedirectResponse
@@ -36,34 +33,22 @@ class StoreController extends Controller
         $plan = $this->findPlan($store, $validated['plan']);
         if (!$plan) return redirect('/')->with('pahri_error', 'Plan tidak dijumpai.');
 
+        $orderId = 'PHR-' . strtoupper(Str::random(9));
         $order = [
-            'id' => 'PHR-' . strtoupper(Str::random(9)),
+            'id' => $orderId,
             'plan_id' => $plan['id'],
             'plan_name' => $plan['name'],
             'ram_gb' => (int) $plan['ram_gb'],
             'amount' => (int) $plan['price'],
             'currency' => $store['currency'] ?? 'IDR',
             'status' => 'pending_payment',
-            'buyer' => [
-                'name' => $validated['buyer_name'],
-                'email' => $validated['buyer_email'],
-                'whatsapp' => $validated['buyer_whatsapp'] ?? '',
-            ],
+            'buyer' => ['name' => $validated['buyer_name'], 'email' => $validated['buyer_email'], 'whatsapp' => $validated['buyer_whatsapp'] ?? ''],
             'panel_account' => null,
-            'payment' => $this->createQrisPayment([
-                'id' => 'pending',
-                'plan_name' => $plan['name'],
-                'ram_gb' => (int) $plan['ram_gb'],
-                'amount' => (int) $plan['price'],
-                'currency' => $store['currency'] ?? 'IDR',
-                'buyer' => $validated,
-            ], $store),
             'created_at' => now()->toIso8601String(),
             'updated_at' => now()->toIso8601String(),
         ];
-        $order['payment']['order_id'] = $order['id'];
+        $order['payment'] = $this->createQrisPayment($order, $store);
         $this->saveOrder($order);
-
         return view('pahri.checkout', ['store' => $store, 'order' => $order]);
     }
 
@@ -82,12 +67,7 @@ class StoreController extends Controller
         ]);
         $order = $this->getOrder($id);
         abort_unless($order, 404);
-        $order['panel_account'] = [
-            'username' => $validated['panel_username'],
-            'email' => $validated['panel_email'],
-            'password_method' => 'owner_create_or_reset_link',
-            'saved_at' => now()->toIso8601String(),
-        ];
+        $order['panel_account'] = ['username' => $validated['panel_username'], 'email' => $validated['panel_email'], 'password_method' => 'owner_create_or_reset_link', 'saved_at' => now()->toIso8601String()];
         $order['status'] = 'pending_provision';
         $order['updated_at'] = now()->toIso8601String();
         $this->saveOrder($order);
@@ -97,12 +77,7 @@ class StoreController extends Controller
     public function owner(Request $request): View
     {
         abort_unless((int) ($request->user()?->id ?? 0) === self::OWNER_USER_ID, 403);
-        return view('pahri.owner', [
-            'store' => $this->storeConfig(),
-            'secrets' => $this->secretStatus(),
-            'orders' => array_values(array_reverse($this->orders())),
-            'features' => $this->featureHub(),
-        ]);
+        return view('pahri.owner', ['store' => $this->storeConfig(), 'secrets' => $this->secretStatus(), 'orders' => array_values(array_reverse($this->orders())), 'features' => $this->featureHub()]);
     }
 
     public function updateOwner(Request $request): RedirectResponse
@@ -117,21 +92,22 @@ class StoreController extends Controller
             'qris_merchant_id' => ['nullable', 'string', 'max:120'],
             'qris_api_key' => ['nullable', 'string', 'max:2000'],
             'qris_clear_key' => ['nullable', 'boolean'],
-            'plan_name.*' => ['required', 'string', 'max:80'],
-            'plan_ram.*' => ['required', 'integer', 'min:1', 'max:128'],
-            'plan_price.*' => ['required', 'integer', 'min:0', 'max:999999999'],
+            'plan_name.*' => ['nullable', 'string', 'max:80'],
+            'plan_ram.*' => ['nullable', 'integer', 'min:1', 'max:128'],
+            'plan_price.*' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'plan_desc.*' => ['nullable', 'string', 'max:220'],
         ]);
+
         $plans = [];
-        foreach ($validated['plan_name'] as $index => $name) {
-            $plans[] = [
-                'id' => Str::slug($name . '-' . ($validated['plan_ram'][$index] ?? 1) . 'gb'),
-                'name' => $name,
-                'ram_gb' => (int) $validated['plan_ram'][$index],
-                'price' => (int) $validated['plan_price'][$index],
-                'description' => trim((string) ($validated['plan_desc'][$index] ?? '')),
-            ];
+        foreach (($validated['plan_name'] ?? []) as $index => $name) {
+            $name = trim((string) $name);
+            if ($name === '') continue;
+            $ram = (int) ($validated['plan_ram'][$index] ?? 1);
+            $price = (int) ($validated['plan_price'][$index] ?? 0);
+            $plans[] = ['id' => Str::slug($name . '-' . $ram . 'gb'), 'name' => $name, 'ram_gb' => max(1, $ram), 'price' => max(0, $price), 'description' => trim((string) ($validated['plan_desc'][$index] ?? ''))];
         }
+        if (count($plans) === 0) $plans = $this->defaultStore()['plans'];
+
         $store = array_merge($this->defaultStore(), $this->storeConfig(), [
             'enabled' => true,
             'store_name' => $validated['store_name'],
@@ -156,20 +132,14 @@ class StoreController extends Controller
         $endpoint = trim((string) ($secrets['qris_endpoint'] ?? $store['qris_endpoint'] ?? ''));
         $apiKey = trim((string) ($secrets['qris_api_key'] ?? ''));
         $payment = ['provider' => 'qris.zakki.store', 'status' => 'not_configured', 'reference' => null, 'qr_string' => null, 'qr_image' => null, 'payment_url' => null, 'raw' => null, 'error' => null];
-        if ($endpoint === '' || $apiKey === '') {
-            $payment['error'] = 'Owner belum set QRIS API key.';
-            return $payment;
-        }
+        if ($endpoint === '' || $apiKey === '') { $payment['error'] = 'Owner belum set QRIS API key.'; return $payment; }
         try {
             $payload = [
                 'api_key' => $apiKey, 'apikey' => $apiKey, 'token' => $apiKey,
                 'merchant_id' => $secrets['qris_merchant_id'] ?? $store['qris_merchant_id'] ?? '',
-                'order_id' => $order['id'], 'reference' => $order['id'],
-                'amount' => $order['amount'], 'nominal' => $order['amount'], 'currency' => $order['currency'],
-                'customer_name' => $order['buyer']['buyer_name'] ?? $order['buyer']['name'] ?? '',
-                'customer_email' => $order['buyer']['buyer_email'] ?? $order['buyer']['email'] ?? '',
+                'order_id' => $order['id'], 'reference' => $order['id'], 'amount' => $order['amount'], 'nominal' => $order['amount'], 'currency' => $order['currency'],
+                'customer_name' => $order['buyer']['name'] ?? '', 'customer_email' => $order['buyer']['email'] ?? '',
                 'description' => $order['plan_name'] . ' ' . $order['ram_gb'] . 'GB RAM',
-                'callback_url' => url('/api/pahri/qris/callback'),
                 'return_url' => url('/order/' . $order['id']),
             ];
             $response = Http::timeout(25)->asForm()->post($endpoint, $payload);
@@ -182,26 +152,11 @@ class StoreController extends Controller
             $payment['payment_url'] = $data['payment_url'] ?? $data['url'] ?? data_get($data, 'data.payment_url') ?? data_get($data, 'data.url');
             $payment['raw'] = $data;
             $payment['error'] = $response->successful() ? null : 'QRIS API HTTP ' . $response->status();
-        } catch (Throwable $e) {
-            $payment['status'] = 'api_error';
-            $payment['error'] = $e->getMessage();
-        }
+        } catch (Throwable $e) { $payment['status'] = 'api_error'; $payment['error'] = $e->getMessage(); }
         return $payment;
     }
 
-    private function defaultStore(): array
-    {
-        return [
-            'enabled' => true, 'store_name' => 'Pahri Panel Store', 'tagline' => 'Beli panel ikut RAM secara automatik.', 'currency' => 'IDR', 'whatsapp' => '',
-            'qris_provider' => 'qris.zakki.store', 'qris_endpoint' => 'https://qris.zakki.store', 'qris_merchant_id' => '', 'qris_status' => 'backend_token_required',
-            'plans' => [
-                ['id' => 'starter-1gb', 'name' => 'Starter Panel', 'ram_gb' => 1, 'price' => 5000, 'description' => 'Untuk bot ringan dan testing.'],
-                ['id' => 'prime-4gb', 'name' => 'Prime Panel', 'ram_gb' => 4, 'price' => 15000, 'description' => 'Plan seimbang untuk bot aktif.'],
-                ['id' => 'ultra-8gb', 'name' => 'Ultra Panel', 'ram_gb' => 8, 'price' => 30000, 'description' => 'Untuk workload berat dan premium user.'],
-            ],
-        ];
-    }
-
+    private function defaultStore(): array { return ['enabled' => true, 'store_name' => 'Pahri Panel Store', 'tagline' => 'Beli panel ikut RAM secara automatik.', 'currency' => 'IDR', 'whatsapp' => '', 'qris_provider' => 'qris.zakki.store', 'qris_endpoint' => 'https://qris.zakki.store', 'qris_merchant_id' => '', 'qris_status' => 'backend_token_required', 'plans' => [['id' => 'starter-1gb', 'name' => 'Starter Panel', 'ram_gb' => 1, 'price' => 5000, 'description' => 'Untuk bot ringan dan testing.'], ['id' => 'prime-4gb', 'name' => 'Prime Panel', 'ram_gb' => 4, 'price' => 15000, 'description' => 'Plan seimbang untuk bot aktif.'], ['id' => 'ultra-8gb', 'name' => 'Ultra Panel', 'ram_gb' => 8, 'price' => 30000, 'description' => 'Untuk workload berat dan premium user.']]]; }
     private function storeConfig(): array { $path = public_path('themes/pahri/store.json'); if (!File::exists($path)) return $this->defaultStore(); $decoded = json_decode((string) File::get($path), true); return array_merge($this->defaultStore(), is_array($decoded) ? $decoded : []); }
     private function featureHub(): array { $path = public_path('themes/pahri/features-150.json'); if (!File::exists($path)) return ['total' => 150, 'items' => []]; $decoded = json_decode((string) File::get($path), true); return is_array($decoded) ? $decoded : ['total' => 150, 'items' => []]; }
     private function findPlan(array $store, string $id): ?array { foreach (($store['plans'] ?? []) as $plan) if (($plan['id'] ?? '') === $id) return $plan; return null; }
