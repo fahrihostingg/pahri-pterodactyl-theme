@@ -1,7 +1,7 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.7.0",
-  "codename": "Owner Store QRIS",
+  "version": "6.7.1",
+  "codename": "Checkout Fail-safe Store",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
@@ -12,6 +12,8 @@
     "dashboard moved to /dashboard",
     "owner center at /owner for user id 1",
     "server-side QRIS checkout adapter for qris.zakki.store",
+    "checkout fail-safe page without 500 on refresh",
+    "owner order status controls",
     "private QRIS token storage outside public folder",
     "order status page and buyer account request flow",
     "owner editable plans, prices, endpoint, merchant id and token",
