@@ -1,15 +1,20 @@
 {
   "name": "Pahri Thema New",
-  "version": "6.6.0",
-  "codename": "Clean Runtime Store",
+  "version": "6.7.0",
+  "codename": "Owner Store QRIS",
   "author": "Pahri",
   "watermark": "by Pahri",
   "repository": "fahrihostingg/pahri-pterodactyl-theme",
   "pterodactyl": "1.14.x",
   "tested_structure": "1.14.1",
   "features": [
-    "clean install mode without using old backup state",
-    "public store landing as root page",
+    "root public store at /",
+    "dashboard moved to /dashboard",
+    "owner center at /owner for user id 1",
+    "server-side QRIS checkout adapter for qris.zakki.store",
+    "private QRIS token storage outside public folder",
+    "order status page and buyer account request flow",
+    "owner editable plans, prices, endpoint, merchant id and token",
     "runtime reskin without React source build dependency",
     "Pahri login restyle through runtime skin",
     "Nexus dock injected through runtime",
@@ -17,9 +22,6 @@
     "broadcast center",
     "admin quick links and visual presets",
     "single custom toggle per feature",
-    "file manager visual selected-state skin",
-    "owner-only QRIS settings",
-    "QRIS token stored outside public folder",
     "maintenance guard and visual security simulation"
   ]
 }
