@@ -42,7 +42,6 @@ restore_from_backup(){
   [[ "${HAD_CONTROLLER:-0}" == "1" ]] && install -D -m 0644 "$BACKUP_DIR/original/app/Http/Controllers/Admin/Settings/AppearanceController.php" "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php" || rm -f "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceController.php"
   [[ "${HAD_STORE_CONTROLLER:-0}" == "1" ]] && install -D -m 0644 "$BACKUP_DIR/original/app/Http/Controllers/Pahri/StoreController.php" "$PANEL_DIR/app/Http/Controllers/Pahri/StoreController.php" || rm -f "$PANEL_DIR/app/Http/Controllers/Pahri/StoreController.php"
   for view in resources/views/admin/settings/appearance.blade.php resources/views/pahri/store.blade.php resources/views/pahri/checkout.blade.php resources/views/pahri/owner.blade.php; do
-    key="HAD_$(basename "$view" | tr 'a-z.-' 'A-Z__')"
     [[ -f "$BACKUP_DIR/original/$view" ]] && install -D -m 0644 "$BACKUP_DIR/original/$view" "$PANEL_DIR/$view" || rm -f "$PANEL_DIR/$view"
   done
   [[ "${HAD_THEME:-0}" == "1" ]] && { rm -rf "$PANEL_DIR/public/themes/pahri"; mkdir -p "$PANEL_DIR/public/themes"; cp -a "$BACKUP_DIR/original/public/themes/pahri" "$PANEL_DIR/public/themes/pahri"; } || rm -rf "$PANEL_DIR/public/themes/pahri"
@@ -98,10 +97,10 @@ find "$PANEL_DIR/public/themes/pahri" -type d -exec chmod 0775 {} +
 find "$PANEL_DIR/public/themes/pahri" -type f -exec chmod 0664 {} +
 
 log "Membersihkan cache Laravel..."
-(cd "$PANEL_DIR" && run_artisan optimize:clear && run_artisan route:list --path=/ --no-ansi | grep -q "pahri.store.index" && run_artisan route:list --path=owner --no-ansi | grep -q "pahri.owner")
+(cd "$PANEL_DIR" && run_artisan optimize:clear && run_artisan route:list --path=checkout --no-ansi | grep -q "pahri.checkout" && run_artisan route:list --path=order --no-ansi | grep -q "pahri.order" && run_artisan route:list --path=owner --no-ansi | grep -q "pahri.owner")
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Store + Owner Center + Admin Theme berjaya dipasang."
-printf '\nRoot Store: /\nDashboard:   /dashboard\nLogin:       /auth/login\nOwner:       /owner\nAdmin:       /admin/settings/appearance\nPHP:         %s | Web user: %s:%s\n' "$PHP_VERSION" "$WEB_USER" "$WEB_GROUP"
+ok "Pahri Store + Owner Center + Checkout Fail-safe berjaya dipasang."
+printf '\nRoot Store: /\nCheckout:    /checkout\nOrder:       /order/{id}\nDashboard:   /dashboard\nLogin:       /auth/login\nOwner:       /owner\nAdmin:       /admin/settings/appearance\nPHP:         %s | Web user: %s:%s\n' "$PHP_VERSION" "$WEB_USER" "$WEB_GROUP"
 [[ -n "$BACKUP_DIR" ]] && printf 'Backup:      %s\n' "$BACKUP_DIR"
