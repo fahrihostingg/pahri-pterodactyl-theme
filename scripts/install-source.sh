@@ -14,7 +14,7 @@ BUILD_LOG="$PANEL_DIR/storage/logs/pahri-theme-build.log"
 log() { printf '\033[1;35m[PAHRI SOURCE]\033[0m %s\n' "$*"; }
 ok() { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[WARN]\033[0m %s\n' "$*"; }
-die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
+die() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; [[ -f "$BUILD_LOG" ]] && { printf '\n--- LAST BUILD LOG ---\n' >&2; tail -n 120 "$BUILD_LOG" >&2 || true; }; exit 1; }
 
 REPLACE_FILES=(
     "resources/scripts/components/App.tsx"
@@ -123,8 +123,10 @@ backup_current_files() {
 }
 
 verify_theme_source() {
-    grep -q "Pahri Panel Store" "$PANEL_DIR/resources/scripts/components/auth/LoginFormContainer.tsx" \
-        || die "Repair gagal: store landing Pahri belum masuk ke LoginFormContainer."
+    grep -q "Pahri Thema New" "$PANEL_DIR/resources/scripts/components/auth/LoginFormContainer.tsx" \
+        || die "Repair gagal: LoginFormContainer masih bukan Pahri Thema New."
+    grep -q "Masuk Dashboard" "$PANEL_DIR/resources/scripts/components/auth/LoginContainer.tsx" \
+        || die "Repair gagal: LoginContainer belum redirect ke dashboard."
     grep -q "PahriNexusDock" "$PANEL_DIR/resources/scripts/components/App.tsx" \
         || die "Repair gagal: App.tsx belum memuatkan Nexus Dock."
     grep -q "FileActionCheckbox" "$PANEL_DIR/resources/scripts/components/server/files/SelectFileCheckbox.tsx" \
@@ -134,12 +136,11 @@ verify_theme_source() {
 
 verify_built_bundle() {
     [[ -f "$PANEL_DIR/public/assets/manifest.json" ]] || die "Build gagal: public/assets/manifest.json tidak dijumpai."
-    if ! grep -R -a -q --include='*.js' "Pahri Panel Store" "$PANEL_DIR/public/assets"; then
-        die "Build selesai tetapi bundle browser masih bukan Pahri. Log: $BUILD_LOG"
+    if ! grep -R -a -q --include='*.js' "Masuk Dashboard" "$PANEL_DIR/public/assets"; then
+        die "Build selesai tetapi bundle login Pahri belum aktif. Log: $BUILD_LOG"
     fi
-    if grep -R -a -q --include='*.js' "Login to Continue" "$PANEL_DIR/public/assets" \
-        && ! grep -R -a -q --include='*.js' "Beli panel" "$PANEL_DIR/public/assets"; then
-        die "Bundle masih kelihatan seperti login Pterodactyl asal. Log: $BUILD_LOG"
+    if grep -R -a -q --include='*.js' "Login to Continue" "$PANEL_DIR/public/assets"; then
+        die "Bundle masih mengandungi login Pterodactyl asal. Log: $BUILD_LOG"
     fi
     ok "Bundle browser Pahri disahkan aktif."
 }
