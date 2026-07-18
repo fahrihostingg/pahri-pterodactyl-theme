@@ -1,15 +1,17 @@
 {
+  "enabled": true,
   "store_name": "Pahri Panel Store",
+  "tagline": "Beli panel ikut RAM secara automatik dengan QRIS.",
   "currency": "IDR",
-  "order_url": "/auth/login",
-  "checkout_mode": "login_required",
+  "whatsapp": "",
   "qris_provider": "qris.zakki.store",
+  "qris_endpoint": "https://qris.zakki.store",
+  "qris_merchant_id": "",
   "qris_status": "backend_token_required",
-  "safe_mode": true,
-  "note": "Token QRIS disimpan di backend owner settings, bukan dalam frontend public.",
+  "note": "API key/token QRIS disimpan di storage/app/pahri-store-secrets.json melalui /owner, bukan dalam frontend public.",
   "plans": [
     { "id": "starter-1gb", "name": "Starter Panel", "ram_gb": 1, "price": 5000, "description": "Untuk bot ringan dan testing." },
-    { "id": "prime-4gb", "name": "Prime Panel", "ram_gb": 4, "price": 15000, "description": "Plan paling seimbang untuk bot aktif." },
+    { "id": "prime-4gb", "name": "Prime Panel", "ram_gb": 4, "price": 15000, "description": "Plan seimbang untuk bot aktif." },
     { "id": "ultra-8gb", "name": "Ultra Panel", "ram_gb": 8, "price": 30000, "description": "Untuk workload berat dan premium user." }
   ]
 }
