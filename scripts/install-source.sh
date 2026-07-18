@@ -9,6 +9,7 @@ STATE_FILE="$PANEL_DIR/.pahri-source-backup"
 RUN_BACKUP=""
 ORIGINAL_BACKUP=""
 COMPLETED=0
+BUILD_LOG="$PANEL_DIR/storage/logs/pahri-theme-build.log"
 
 log() { printf '\033[1;35m[PAHRI SOURCE]\033[0m %s\n' "$*"; }
 ok() { printf '\033[1;32m[OK]\033[0m %s\n' "$*"; }
@@ -106,7 +107,6 @@ copy_theme_files() {
     local from="$1"
     local to="$2"
     for relative in "${ALL_FILES[@]}"; do
-        [[ -f "$from/$relative" ]] || continue
         install -D -m 0644 "$from/$relative" "$to/$relative"
     done
 }
@@ -123,8 +123,8 @@ backup_current_files() {
 }
 
 verify_theme_source() {
-    grep -q "Pahri Thema New" "$PANEL_DIR/resources/scripts/components/auth/LoginFormContainer.tsx" \
-        || die "Repair gagal: LoginFormContainer masih bukan Pahri Thema New."
+    grep -q "Pahri Panel Store" "$PANEL_DIR/resources/scripts/components/auth/LoginFormContainer.tsx" \
+        || die "Repair gagal: store landing Pahri belum masuk ke LoginFormContainer."
     grep -q "PahriNexusDock" "$PANEL_DIR/resources/scripts/components/App.tsx" \
         || die "Repair gagal: App.tsx belum memuatkan Nexus Dock."
     grep -q "FileActionCheckbox" "$PANEL_DIR/resources/scripts/components/server/files/SelectFileCheckbox.tsx" \
@@ -132,25 +132,40 @@ verify_theme_source() {
     ok "Source React Pahri disahkan terpasang."
 }
 
+verify_built_bundle() {
+    [[ -f "$PANEL_DIR/public/assets/manifest.json" ]] || die "Build gagal: public/assets/manifest.json tidak dijumpai."
+    if ! grep -R -a -q --include='*.js' "Pahri Panel Store" "$PANEL_DIR/public/assets"; then
+        die "Build selesai tetapi bundle browser masih bukan Pahri. Log: $BUILD_LOG"
+    fi
+    if grep -R -a -q --include='*.js' "Login to Continue" "$PANEL_DIR/public/assets" \
+        && ! grep -R -a -q --include='*.js' "Beli panel" "$PANEL_DIR/public/assets"; then
+        die "Bundle masih kelihatan seperti login Pterodactyl asal. Log: $BUILD_LOG"
+    fi
+    ok "Bundle browser Pahri disahkan aktif."
+}
+
 build_panel() {
     cd "$PANEL_DIR"
     export NODE_OPTIONS="${NODE_OPTIONS:-} --max_old_space_size=4096"
-    yarn install --frozen-lockfile --network-timeout 600000
+    mkdir -p "$(dirname "$BUILD_LOG")"
+    : > "$BUILD_LOG"
+    yarn install --frozen-lockfile --network-timeout 600000 2>&1 | tee -a "$BUILD_LOG"
     rm -rf public/assets/*
-    yarn build:production
+    yarn build:production 2>&1 | tee -a "$BUILD_LOG"
+    verify_built_bundle
     php artisan optimize:clear >/dev/null
 }
 
 restore_run_backup() {
     [[ -n "$RUN_BACKUP" && -d "$RUN_BACKUP" ]] || return 0
-    warn "Build gagal. Memulihkan source sebelum pemasangan..."
+    warn "Build Pahri gagal. Memulihkan source sebelum pemasangan..."
     for relative in "${REPLACE_FILES[@]}"; do
         install -D -m 0644 "$RUN_BACKUP/$relative" "$PANEL_DIR/$relative"
     done
     for relative in "${EXTRA_FILES[@]}"; do
         [[ -f "$RUN_BACKUP/$relative" ]] && install -D -m 0644 "$RUN_BACKUP/$relative" "$PANEL_DIR/$relative" || rm -f "$PANEL_DIR/$relative"
     done
-    (build_panel) || warn "Source dipulihkan tetapi rebuild asal gagal. Jalankan yarn build:production secara manual."
+    warn "Log kegagalan disimpan di $BUILD_LOG"
 }
 
 on_error() {
@@ -179,11 +194,11 @@ else
     warn "Source theme telah dipasang. Mengemas kini tanpa menimpa backup asal."
 fi
 
-log "Repair penuh: menyalin semula semua komponen Pahri Thema New..."
+log "Hard repair: overwrite semua source React Pahri Thema New..."
 copy_theme_files "$SOURCE_DIR" "$PANEL_DIR"
 verify_theme_source
 
-log "Membina frontend production bersih dengan Node $(node -v) dan Yarn $(yarn --version)..."
+log "Membina bundle browser Pahri dari kosong dengan Node $(node -v) dan Yarn $(yarn --version)..."
 build_panel
 
 PANEL_OWNER="$(stat -c '%U:%G' "$PANEL_DIR/artisan")"
@@ -194,5 +209,6 @@ done
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Thema New repair/full source berjaya dibina dan diaktifkan."
+ok "Pahri Thema New hard repair berjaya dan bundle browser telah disahkan."
 printf 'Backup asal: %s\n' "$ORIGINAL_BACKUP"
+printf 'Build log: %s\n' "$BUILD_LOG"
