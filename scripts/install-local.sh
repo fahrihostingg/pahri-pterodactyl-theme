@@ -75,7 +75,7 @@ install -D -m 0644 "$PACKAGE_DIR/files/resources/views/pahri/checkout.blade.php"
 install -D -m 0644 "$PACKAGE_DIR/files/resources/views/pahri/owner.blade.php" "$PANEL_DIR/resources/views/pahri/owner.blade.php"
 
 log "Memasang aset Pahri Theme..."
-mkdir -p "$PANEL_DIR/public/themes/pahri/uploads"
+mkdir -p "$PANEL_DIR/public/themes/pahri/uploads" "$PANEL_DIR/storage/app"
 for asset in client.css admin.css default-logo.svg default-wallpaper.svg; do install -m 0644 "$PACKAGE_DIR/files/public/themes/pahri/$asset" "$PANEL_DIR/public/themes/pahri/$asset"; done
 for asset in settings.json custom.css store.json features-150.json; do [[ -f "$PANEL_DIR/public/themes/pahri/$asset" ]] || install -m 0664 "$PACKAGE_DIR/files/public/themes/pahri/$asset" "$PANEL_DIR/public/themes/pahri/$asset"; done
 
@@ -95,12 +95,21 @@ chown "$PANEL_OWNER" "$PANEL_DIR/app/Http/Controllers/Admin/Settings/AppearanceC
 chown -R "$WEB_USER:$WEB_GROUP" "$PANEL_DIR/public/themes/pahri" "$PANEL_DIR/storage/app"
 find "$PANEL_DIR/public/themes/pahri" -type d -exec chmod 0775 {} +
 find "$PANEL_DIR/public/themes/pahri" -type f -exec chmod 0664 {} +
+chmod 0775 "$PANEL_DIR/storage/app"
 
-log "Membersihkan cache Laravel..."
-(cd "$PANEL_DIR" && run_artisan optimize:clear && run_artisan route:list --path=checkout --no-ansi | grep -q "pahri.checkout" && run_artisan route:list --path=order --no-ansi | grep -q "pahri.order" && run_artisan route:list --path=owner --no-ansi | grep -q "pahri.owner")
+log "Membersihkan cache Laravel dan mengesahkan route..."
+(
+  cd "$PANEL_DIR"
+  run_artisan optimize:clear
+  run_artisan route:clear
+  run_artisan route:list --path=/ --no-ansi | grep -q "pahri.store.index"
+  run_artisan route:list --path=checkout --no-ansi | grep -q "pahri.checkout"
+  run_artisan route:list --path=order --no-ansi | grep -q "pahri.order"
+  run_artisan route:list --path=owner --no-ansi | grep -q "pahri.owner"
+)
 
 COMPLETED=1
 trap - ERR
-ok "Pahri Store + Owner Center + Checkout Fail-safe berjaya dipasang."
-printf '\nRoot Store: /\nCheckout:    /checkout\nOrder:       /order/{id}\nDashboard:   /dashboard\nLogin:       /auth/login\nOwner:       /owner\nAdmin:       /admin/settings/appearance\nPHP:         %s | Web user: %s:%s\n' "$PHP_VERSION" "$WEB_USER" "$WEB_GROUP"
+ok "Pahri Store + Owner Center + Admin Theme berjaya dipasang dan route disahkan."
+printf '\nRoot Store: /\nDashboard:   /dashboard\nLogin:       /auth/login\nOwner:       /owner\nAdmin:       /admin/settings/appearance\nPHP:         %s | Web user: %s:%s\n' "$PHP_VERSION" "$WEB_USER" "$WEB_GROUP"
 [[ -n "$BACKUP_DIR" ]] && printf 'Backup:      %s\n' "$BACKUP_DIR"
