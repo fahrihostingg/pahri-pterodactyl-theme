@@ -6,8 +6,11 @@ import os
 import sys
 from pathlib import Path
 
-TWO_FA = '\\Pterodactyl\\Http\\Middleware\\RequireTwoFactorAuthentication::class'
-PUBLIC_MIDDLEWARE = "['auth', " + TWO_FA + "]"
+# IMPORTANT: keep public middleware strings only. Do not reference optional PHP classes here.
+# Some Pterodactyl installs do not import RequireTwoFactorAuthentication in routes/base.php,
+# and a ::class reference can make every route return 500 during Laravel boot.
+PUBLIC_MIDDLEWARE = "['auth']"
+STORE = "\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class"
 
 
 def fail(message: str) -> None:
@@ -21,15 +24,19 @@ def atomic_write(path: Path, content: str) -> None:
     os.replace(tmp, path)
 
 
-def normalize_old_public_middleware(text: str) -> str:
-    # Repair installs that used an unqualified middleware class and caused Laravel boot-time 500s.
-    text = text.replace("['auth', RequireTwoFactorAuthentication::class]", PUBLIC_MIDDLEWARE)
-    text = text.replace("['auth', \\Pterodactyl\\Http\\Middleware\\RequireTwoFactorAuthentication::class]", PUBLIC_MIDDLEWARE)
+def normalize_broken_middleware(text: str) -> str:
+    replacements = [
+        "['auth', RequireTwoFactorAuthentication::class]",
+        "['auth', \\Pterodactyl\\Http\\Middleware\\RequireTwoFactorAuthentication::class]",
+        "['auth', Pterodactyl\\Http\\Middleware\\RequireTwoFactorAuthentication::class]",
+    ]
+    for item in replacements:
+        text = text.replace(item, PUBLIC_MIDDLEWARE)
     return text
 
 
 def patch_base_routes(text: str) -> str:
-    text = normalize_old_public_middleware(text)
+    text = normalize_broken_middleware(text)
 
     legacy_public = "Route::get('/', fn () => view('pahri.store'))\n    ->withoutMiddleware(" + PUBLIC_MIDDLEWARE + ")\n    ->name('pahri.store.index');"
     if legacy_public in text:
@@ -42,7 +49,7 @@ def patch_base_routes(text: str) -> str:
     text = text.replace("Route::get('/', [Base\\IndexController::class, 'index'])->name('index')->fallback();", '__PAHRI_ROOT_BLOCK__')
 
     if 'Pahri\\StoreController' in text:
-        # Upgrade older Pahri route blocks in place.
+        # Repair older Pahri route blocks in place without adding duplicate routes.
         if "Route::get('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkoutIndex'])" not in text:
             text = text.replace(
                 "Route::post('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkout'])",
@@ -55,29 +62,29 @@ def patch_base_routes(text: str) -> str:
                 "Route::post('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOwner'])\n    ->name('pahri.owner.update');\nRoute::post('/owner/order/{id}', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOrder'])\n    ->name('pahri.owner.order.update');",
                 1,
             )
-        return normalize_old_public_middleware(text)
+        return normalize_broken_middleware(text)
 
     block = f"""Route::get('/dashboard', [Base\\IndexController::class, 'index'])->name('index');
-Route::get('/', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'index'])
+Route::get('/', [{STORE}, 'index'])
     ->withoutMiddleware({PUBLIC_MIDDLEWARE})
     ->name('pahri.store.index');
-Route::get('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkoutIndex'])
+Route::get('/checkout', [{STORE}, 'checkoutIndex'])
     ->withoutMiddleware({PUBLIC_MIDDLEWARE})
     ->name('pahri.checkout.index');
-Route::post('/checkout', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'checkout'])
+Route::post('/checkout', [{STORE}, 'checkout'])
     ->withoutMiddleware({PUBLIC_MIDDLEWARE})
     ->name('pahri.checkout');
-Route::get('/order/{{id}}', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'order'])
+Route::get('/order/{{id}}', [{STORE}, 'order'])
     ->withoutMiddleware({PUBLIC_MIDDLEWARE})
     ->name('pahri.order');
-Route::post('/order/{{id}}/account', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'saveAccount'])
+Route::post('/order/{{id}}/account', [{STORE}, 'saveAccount'])
     ->withoutMiddleware({PUBLIC_MIDDLEWARE})
     ->name('pahri.order.account');
-Route::get('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'owner'])
+Route::get('/owner', [{STORE}, 'owner'])
     ->name('pahri.owner');
-Route::post('/owner', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOwner'])
+Route::post('/owner', [{STORE}, 'updateOwner'])
     ->name('pahri.owner.update');
-Route::post('/owner/order/{{id}}', [\\Pterodactyl\\Http\\Controllers\\Pahri\\StoreController::class, 'updateOrder'])
+Route::post('/owner/order/{{id}}', [{STORE}, 'updateOrder'])
     ->name('pahri.owner.order.update');"""
 
     if '__PAHRI_ROOT_BLOCK__' not in text:
