@@ -1,56 +1,53 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { Form } from 'formik';
 import styled, { keyframes } from 'styled-components/macro';
 import FlashMessageRender from '@/components/FlashMessageRender';
 
-const orbit = keyframes`
-    from { transform: rotateX(68deg) rotateZ(0deg); }
-    to { transform: rotateX(68deg) rotateZ(360deg); }
-`;
-
-const drift = keyframes`
-    0%, 100% { transform: translate3d(0, 0, 0) rotateX(58deg) rotateZ(34deg); }
-    50% { transform: translate3d(18px, -25px, 0) rotateX(66deg) rotateZ(49deg); }
+const float = keyframes`
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(8deg); }
+    50% { transform: translate3d(0, -18px, 0) rotate(15deg); }
 `;
 
 const pulse = keyframes`
-    0%, 100% { opacity: .48; transform: scale(.94); }
+    0%, 100% { opacity: .55; transform: scale(.96); }
     50% { opacity: 1; transform: scale(1.08); }
 `;
 
-const Root = styled.div`
-    width: min(1280px, calc(100vw - 28px));
-    min-height: 760px;
-    margin: 24px auto;
-    display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(390px, .75fr);
-    overflow: hidden;
-    position: relative;
-    border: 1px solid rgba(255,255,255,.115);
-    border-radius: calc(var(--pahri-radius, 24px) * 1.42);
-    background: rgba(4,8,22,var(--pahri-glass-opacity,.78));
-    box-shadow: 0 55px 160px rgba(0,0,0,.68), 0 0 80px color-mix(in srgb, var(--pahri-accent) 8%, transparent), inset 0 1px rgba(255,255,255,.085);
-    backdrop-filter: blur(var(--pahri-blur, 24px)) saturate(165%);
+type StorePlan = {
+    id: string;
+    name: string;
+    ram_gb: number;
+    price: number;
+    description: string;
+};
 
-    &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: 4;
-        border-radius: inherit;
-        pointer-events: none;
-        background: linear-gradient(135deg, rgba(255,255,255,.055), transparent 35%, rgba(255,255,255,.018));
-    }
+type StoreConfig = {
+    store_name?: string;
+    currency?: string;
+    order_url?: string;
+    plans?: StorePlan[];
+};
+
+const Page = styled.main`
+    width: min(1380px, calc(100vw - 24px));
+    min-height: calc(100vh - 24px);
+    margin: 12px auto;
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(380px, .7fr);
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: calc(var(--pahri-radius, 24px) * 1.25);
+    background: rgba(2,6,18,.9);
+    box-shadow: 0 45px 150px rgba(0,0,0,.7), inset 0 1px rgba(255,255,255,.08);
 
     @media (max-width: 980px) {
         grid-template-columns: 1fr;
-        min-height: auto;
-        margin: 12px auto;
-        border-radius: 26px;
+        margin: 8px auto;
     }
 `;
 
-const Visual = styled.section`
+const Store = styled.section`
     min-height: 760px;
     padding: 46px;
     position: relative;
@@ -59,9 +56,9 @@ const Visual = styled.section`
     flex-direction: column;
     justify-content: space-between;
     background:
-        radial-gradient(circle at 18% 16%, color-mix(in srgb, var(--pahri-accent) 38%, transparent), transparent 35%),
-        radial-gradient(circle at 84% 76%, color-mix(in srgb, var(--pahri-accent-secondary) 28%, transparent), transparent 40%),
-        linear-gradient(145deg, rgba(7,12,32,.88), rgba(3,7,20,.72)),
+        radial-gradient(circle at 12% 8%, rgba(168,85,247,.32), transparent 34%),
+        radial-gradient(circle at 88% 76%, rgba(34,211,238,.22), transparent 38%),
+        linear-gradient(145deg, rgba(5,10,29,.84), rgba(2,6,18,.74)),
         var(--pahri-wallpaper);
     background-size: cover;
     background-position: center;
@@ -70,357 +67,207 @@ const Visual = styled.section`
         content: '';
         position: absolute;
         inset: 0;
-        opacity: .24;
+        opacity: .18;
         background-image:
-            linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-        background-size: 44px 44px;
-        mask-image: linear-gradient(to bottom, #000, transparent 88%);
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, transparent 72%, rgba(2,6,23,.62));
+            linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: linear-gradient(to bottom, #000, transparent 92%);
+        pointer-events: none;
     }
 
     @media (max-width: 980px) {
         min-height: auto;
-        padding: 34px;
+        padding: 32px 24px 38px;
     }
 `;
 
 const Brand = styled.div`
     position: relative;
-    z-index: 5;
+    z-index: 3;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 13px;
 `;
 
-const Logo = styled.div`
-    width: 60px;
-    height: 60px;
-    border: 1px solid rgba(255,255,255,.145);
-    border-radius: calc(var(--pahri-radius, 24px) * .82);
-    background-image: var(--pahri-logo), linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.025));
-    background-size: 76%, cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    box-shadow: 0 22px 62px rgba(0,0,0,.42), 0 0 38px color-mix(in srgb, var(--pahri-accent) 46%, transparent), inset 0 1px rgba(255,255,255,.08);
-    transform: perspective(500px) rotateX(7deg) rotateY(-9deg);
+const Logo = styled.span`
+    width: 56px;
+    height: 56px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 18px;
+    background: var(--pahri-logo) center / 76% no-repeat, linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.025));
+    box-shadow: 0 18px 48px rgba(0,0,0,.35), 0 0 35px rgba(168,85,247,.3);
 `;
 
-const Product = styled.div`
-    color: #fff;
-    strong { display: block; font-size: 18px; font-weight: 880; letter-spacing: -.035em; }
-    span { display: block; margin-top: 4px; color: rgba(226,232,240,.48); font-size: 8px; font-weight: 850; letter-spacing: .18em; text-transform: uppercase; }
+const BrandText = styled.div`
+    strong { display:block; color:#fff; font-size:17px; font-weight:900; letter-spacing:-.04em; }
+    span { display:block; margin-top:4px; color:rgba(226,232,240,.46); font-size:8px; font-weight:850; letter-spacing:.17em; text-transform:uppercase; }
 `;
 
 const Hero = styled.div`
     position: relative;
-    z-index: 5;
-    max-width: 680px;
-    margin-top: 34px;
+    z-index: 3;
+    margin: 48px 0 28px;
 
     small {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 8px 11px;
-        border: 1px solid rgba(255,255,255,.11);
-        border-radius: 999px;
-        color: #cffafe;
-        background: color-mix(in srgb, var(--pahri-accent-secondary) 9%, transparent);
-        font-size: 9px;
-        font-weight: 900;
-        letter-spacing: .15em;
-        text-transform: uppercase;
+        display:inline-flex;
+        align-items:center;
+        gap:7px;
+        padding:8px 11px;
+        border:1px solid rgba(255,255,255,.1);
+        border-radius:999px;
+        color:#cffafe;
+        background:rgba(34,211,238,.07);
+        font-size:9px;
+        font-weight:900;
+        letter-spacing:.14em;
+        text-transform:uppercase;
     }
 
-    small::before {
-        content: '';
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--pahri-accent-secondary);
-        box-shadow: 0 0 14px var(--pahri-accent-secondary);
-    }
-
-    h1 {
-        margin: 18px 0 13px;
-        color: #fff;
-        font-size: clamp(44px, 5.3vw, 78px);
-        line-height: .92;
-        letter-spacing: -.072em;
-        text-wrap: balance;
-    }
-
-    h1 span {
-        color: transparent;
-        background: linear-gradient(100deg, #fff, #fde68a 35%, #67e8f9);
-        background-clip: text;
-        -webkit-background-clip: text;
-    }
-
-    p {
-        max-width: 600px;
-        margin: 0;
-        color: rgba(226,232,240,.62);
-        font-size: 14px;
-        line-height: 1.85;
-    }
+    small::before { content:''; width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 14px #22c55e; animation:${pulse} 1.8s ease-in-out infinite; }
+    h1 { max-width:820px; margin:18px 0 14px; color:#fff; font-size:clamp(46px,6vw,88px); line-height:.9; letter-spacing:-.075em; }
+    h1 span { color:transparent; background:linear-gradient(100deg,#fff,#ddd6fe 42%,#67e8f9); background-clip:text; -webkit-background-clip:text; }
+    p { max-width:680px; margin:0; color:rgba(226,232,240,.56); font-size:14px; line-height:1.8; }
 `;
 
-const StoreGrid = styled.div`
-    position: relative;
-    z-index: 5;
-    margin-top: 28px;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+const Plans = styled.div`
+    position:relative;
+    z-index:3;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
 
-    @media (max-width: 1180px) { grid-template-columns: 1fr; }
+    @media(max-width:760px){grid-template-columns:1fr;}
 `;
 
-const Plan = styled.div`
-    padding: 15px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.11);
-    border-radius: calc(var(--pahri-radius, 24px) * .7);
-    background: rgba(5,9,23,.58);
-    box-shadow: inset 0 1px rgba(255,255,255,.06), 0 16px 45px rgba(0,0,0,.24);
-    backdrop-filter: blur(var(--pahri-blur, 24px));
+const Plan = styled.a`
+    min-height:190px;
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:20px;
+    color:#fff;
+    background:rgba(5,9,24,.68);
+    box-shadow:0 18px 55px rgba(0,0,0,.26),inset 0 1px rgba(255,255,255,.05);
+    text-decoration:none!important;
+    backdrop-filter:blur(18px);
+    transition:.22s ease;
 
-    &::before {
-        content: '';
-        position: absolute;
-        width: 90px;
-        height: 90px;
-        right: -50px;
-        top: -52px;
-        border-radius: 50%;
-        background: color-mix(in srgb, var(--pahri-accent) 18%, transparent);
-        filter: blur(18px);
-    }
-
-    strong { display:block; position:relative; color:#fff; font-size:16px; font-weight:850; letter-spacing:-.035em; }
-    span { display:block; position:relative; margin-top:6px; color:#fde68a; font-size:20px; font-weight:900; letter-spacing:-.04em; }
-    small { display:block; position:relative; margin-top:4px; color:rgba(226,232,240,.48); font-size:9px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+    &:hover { color:#fff; transform:translateY(-5px); border-color:rgba(168,85,247,.48); box-shadow:0 30px 75px rgba(0,0,0,.42),0 0 30px rgba(168,85,247,.13); }
+    &::after { content:''; position:absolute; width:110px; height:110px; right:-55px; top:-55px; border-radius:50%; background:rgba(168,85,247,.15); filter:blur(16px); }
+    small { color:#67e8f9; font-size:8px; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }
+    strong { margin-top:10px; color:#fff; font-size:18px; font-weight:850; letter-spacing:-.035em; }
+    p { margin:7px 0 15px; color:rgba(226,232,240,.45); font-size:10px; line-height:1.55; }
+    b { margin-top:auto; color:#fff; font-size:20px; }
+    em { margin-top:8px; color:#c4b5fd; font-size:9px; font-style:normal; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
 `;
 
-const FeatureStrip = styled.div`
-    position: relative;
-    z-index: 5;
-    margin-top: 14px;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-
-    @media (max-width: 760px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+const Floating = styled.span`
+    position:absolute;
+    width:140px;
+    height:140px;
+    right:8%;
+    top:13%;
+    z-index:1;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:34px;
+    background:linear-gradient(135deg,rgba(168,85,247,.16),rgba(34,211,238,.06));
+    box-shadow:0 25px 70px rgba(0,0,0,.25);
+    animation:${float} 9s ease-in-out infinite;
+    pointer-events:none;
 `;
 
-const Feature = styled.div`
-    padding: 10px;
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 13px;
-    color: rgba(241,245,249,.78);
-    background: rgba(255,255,255,.035);
-    font-size: 10px;
-    font-weight: 800;
-    text-align: center;
+const LoginPanel = styled.aside`
+    min-height:760px;
+    padding:54px 42px;
+    position:relative;
+    display:flex;
+    align-items:center;
+    background:linear-gradient(160deg,rgba(8,13,31,.98),rgba(2,6,18,.96));
+
+    @media(max-width:980px){min-height:auto;padding:42px 24px 50px;}
 `;
 
-const Scene = styled.div`
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    perspective: 1000px;
+const LoginInner = styled.div`
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+
+    h2 { margin:0 0 8px; color:#fff; font-size:32px; font-weight:900; letter-spacing:-.055em; }
+    > p { margin:0 0 28px; color:rgba(226,232,240,.44); font-size:12px; line-height:1.7; }
+    form > div { padding:0!important; background:transparent!important; box-shadow:none!important; }
+    label { color:rgba(241,245,249,.72)!important; }
+    input { min-height:54px!important; color:#fff!important; border:1px solid rgba(255,255,255,.11)!important; border-radius:15px!important; background:rgba(2,6,23,.68)!important; box-shadow:inset 0 1px rgba(255,255,255,.04)!important; }
+    input:focus { border-color:var(--pahri-accent)!important; box-shadow:0 0 0 4px rgba(168,85,247,.16)!important; }
+    button[type='submit'] { width:100%; min-height:54px; border-radius:15px!important; background:linear-gradient(135deg,var(--pahri-accent),var(--pahri-accent-secondary))!important; box-shadow:0 20px 48px rgba(168,85,247,.28)!important; }
 `;
 
-const Cube = styled.span<{ $size: number; $top: string; $left: string; $delay: string }>`
-    position: absolute;
-    top: ${props => props.$top};
-    left: ${props => props.$left};
-    width: ${props => props.$size}px;
-    height: ${props => props.$size}px;
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: calc(var(--pahri-radius, 24px) * .95);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--pahri-accent) 22%, transparent), color-mix(in srgb, var(--pahri-accent-secondary) 8%, transparent));
-    box-shadow: inset 0 1px rgba(255,255,255,.08), 0 28px 70px rgba(0,0,0,.28);
-    transform-style: preserve-3d;
-    animation: ${drift} calc(var(--pahri-motion-duration, 18s) * .56) ease-in-out infinite;
-    animation-delay: ${props => props.$delay};
-    animation-play-state: var(--pahri-animation-state);
-    backdrop-filter: blur(12px);
+const Trust = styled.div`
+    margin-top:24px;
+    padding-top:18px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    border-top:1px solid rgba(255,255,255,.06);
+
+    span { padding:9px 6px; border:1px solid rgba(255,255,255,.06); border-radius:11px; color:rgba(226,232,240,.38); background:rgba(255,255,255,.025); font-size:8px; font-weight:800; text-align:center; letter-spacing:.06em; text-transform:uppercase; }
 `;
 
-const Orbital = styled.div`
-    width: 250px;
-    height: 250px;
-    position: absolute;
-    right: 8%;
-    top: 22%;
-    display: grid;
-    place-items: center;
-    @media (max-width: 1100px) { opacity: .56; transform: scale(.78); right: 1%; }
-`;
+type Props = React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> & { title?: string };
 
-const Ring = styled.span<{ $size: number; $reverse?: boolean }>`
-    position: absolute;
-    width: ${props => props.$size}px;
-    height: ${props => props.$size}px;
-    border: 1px solid ${props => (props.$reverse ? 'color-mix(in srgb, var(--pahri-accent-secondary) 45%, transparent)' : 'color-mix(in srgb, var(--pahri-accent) 45%, transparent)')};
-    border-radius: 50%;
-    box-shadow: 0 0 28px color-mix(in srgb, var(--pahri-accent) 10%, transparent);
-    animation: ${orbit} ${props => (props.$reverse ? '12s' : '18s')} linear infinite ${props => (props.$reverse ? 'reverse' : 'normal')};
-    animation-play-state: var(--pahri-animation-state);
+const fallbackPlans: StorePlan[] = [
+    { id:'starter-1gb', name:'Starter Panel', ram_gb:1, price:5000, description:'Sesuai untuk bot ringan dan testing.' },
+    { id:'prime-4gb', name:'Prime Panel', ram_gb:4, price:15000, description:'Pilihan seimbang untuk bot aktif.' },
+    { id:'ultra-8gb', name:'Ultra Panel', ram_gb:8, price:30000, description:'Untuk workload berat dan premium.' },
+];
 
-    &::before {
-        content: '';
-        position: absolute;
-        top: -4px;
-        left: 50%;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: ${props => (props.$reverse ? 'var(--pahri-accent-secondary)' : 'var(--pahri-accent)')};
-        box-shadow: 0 0 16px currentColor;
-    }
-`;
+export default forwardRef<HTMLFormElement, Props>(({ title, ...props }, ref) => {
+    const [store, setStore] = useState<StoreConfig>({ store_name:'Pahri Panel Store', currency:'IDR', plans:fallbackPlans });
 
-const Status = styled.div`
-    position: relative;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    color: rgba(226,232,240,.58);
-    font-size: 9px;
-    font-weight: 850;
-    letter-spacing: .14em;
-    text-transform: uppercase;
+    useEffect(() => {
+        fetch(`/themes/pahri/store.json?v=${Date.now()}`, { cache:'no-store' })
+            .then(response => response.ok ? response.json() : Promise.reject(new Error('Store config unavailable')))
+            .then((config: StoreConfig) => setStore({ ...config, plans:Array.isArray(config.plans) && config.plans.length ? config.plans : fallbackPlans }))
+            .catch(() => undefined);
+    }, []);
 
-    &::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #22c55e;
-        box-shadow: 0 0 17px #22c55e;
-        animation: ${pulse} 1.8s ease-in-out infinite;
-        animation-play-state: var(--pahri-animation-state);
-    }
-`;
+    const currency = store.currency || 'IDR';
+    const orderUrl = store.order_url || '#pahri-login';
 
-const Panel = styled.section`
-    padding: 66px 52px;
-    position: relative;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    background: linear-gradient(160deg, rgba(8,13,31,.97), rgba(2,6,18,.94));
-
-    &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        opacity: .08;
-        background: radial-gradient(circle at 100% 0, var(--pahri-accent), transparent 42%);
-        pointer-events: none;
-    }
-
-    @media (max-width: 920px) { padding: 40px 28px 46px; }
-`;
-
-const FormArea = styled.div`
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
-
-    h2 { margin: 0 0 7px; color: #fff; font-size: 31px; font-weight: 880; letter-spacing: -.05em; }
-    .pahri-auth-subtitle { margin: 0 0 30px; color: rgba(226,232,240,.45); font-size: 13px; line-height: 1.65; }
-    form > div { padding: 0 !important; background: transparent !important; box-shadow: none !important; }
-    label { color: rgba(241,245,249,.72) !important; }
-
-    input {
-        min-height: 54px !important;
-        color: #fff !important;
-        border: 1px solid rgba(255,255,255,.11) !important;
-        border-radius: calc(var(--pahri-radius, 24px) * .62) !important;
-        background: rgba(2,6,23,.64) !important;
-        box-shadow: inset 0 1px rgba(255,255,255,.04) !important;
-        backdrop-filter: blur(var(--pahri-blur, 24px));
-    }
-
-    input:focus {
-        border-color: var(--pahri-accent) !important;
-        box-shadow: 0 0 0 4px color-mix(in srgb, var(--pahri-accent) 18%, transparent), 0 16px 42px rgba(0,0,0,.24) !important;
-    }
-
-    button[type='submit'] {
-        width: 100%;
-        min-height: 54px;
-        border-radius: calc(var(--pahri-radius, 24px) * .62) !important;
-        background: linear-gradient(135deg, var(--pahri-accent), var(--pahri-accent-secondary)) !important;
-        box-shadow: 0 20px 48px color-mix(in srgb, var(--pahri-accent) 32%, transparent) !important;
-    }
-`;
-
-const Foot = styled.p`
-    margin: 26px 0 0;
-    color: rgba(226,232,240,.3);
-    font-size: 9px;
-    text-align: center;
-    letter-spacing: .13em;
-    text-transform: uppercase;
-`;
-
-type Props = React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement> & {
-    title?: string;
-};
-
-const features = ['150+ fitur', 'QRIS ready', 'Auto order flow', 'Panel RAM plans'];
-
-export default forwardRef<HTMLFormElement, Props>(({ title, ...props }, ref) => (
-    <Root>
-        <Visual>
-            <Scene aria-hidden={'true'}>
-                <Cube $size={160} $top={'8%'} $left={'57%'} $delay={'-1s'} />
-                <Cube $size={96} $top={'68%'} $left={'73%'} $delay={'-5s'} />
-                <Cube $size={62} $top={'50%'} $left={'14%'} $delay={'-9s'} />
-                <Orbital><Ring $size={238} /><Ring $size={172} $reverse /></Orbital>
-            </Scene>
-            <Brand>
-                <Logo />
-                <Product><strong>Pahri Panel Store</strong><span>Nexus Storefront + Control Panel</span></Product>
-            </Brand>
-            <Hero>
-                <small>Automated Panel Store</small>
-                <h1>Beli panel ikut RAM,<br /><span>urus semua dari satu tempat.</span></h1>
-                <p>Landing pertama kini bergaya store: pilih plan RAM, sambung payment QRIS, aktifkan broadcast, maintenance, fake hacking visual, quick links dan feature hub tanpa rosakkan panel.</p>
-            </Hero>
-            <StoreGrid>
-                <Plan><strong>Starter Panel</strong><span>1 GB RAM</span><small>Untuk bot ringan</small></Plan>
-                <Plan><strong>Prime Panel</strong><span>4 GB RAM</span><small>Best seller</small></Plan>
-                <Plan><strong>Ultra Panel</strong><span>8 GB RAM</span><small>High performance</small></Plan>
-            </StoreGrid>
-            <FeatureStrip>{features.map(item => <Feature key={item}>{item}</Feature>)}</FeatureStrip>
-            <Status>QRIS integration bridge ready • token set from backend only</Status>
-        </Visual>
-        <Panel>
-            <FormArea>
-                <h2>{title || 'Secure Access'}</h2>
-                <p className={'pahri-auth-subtitle'}>Login admin untuk aktifkan store, QRIS, maintenance, broadcast dan 150+ feature hub.</p>
-                <FlashMessageRender css={undefined} />
-                <Form {...props} ref={ref}>{props.children}</Form>
-                <Foot>&copy; {new Date().getFullYear()} Pahri Thema New Store &mdash; Crafted by Pahri</Foot>
-            </FormArea>
-        </Panel>
-    </Root>
-));
+    return (
+        <Page>
+            <Store>
+                <Floating aria-hidden={'true'} />
+                <Brand><Logo /><BrandText><strong>{store.store_name || 'Pahri Panel Store'}</strong><span>Premium Panel & Cloud Store</span></BrandText></Brand>
+                <Hero>
+                    <small>Instant panel plans</small>
+                    <h1>Beli panel.<br/><span>Deploy lebih pantas.</span></h1>
+                    <p>Pilih RAM yang sesuai, masuk ke akaun dan teruskan pembelian melalui sistem order Pahri. Semua plan dibina untuk bot, aplikasi dan workload digital.</p>
+                </Hero>
+                <Plans>
+                    {(store.plans || fallbackPlans).slice(0,3).map(plan => (
+                        <Plan key={plan.id} href={`${orderUrl}${orderUrl.includes('?') ? '&' : '?'}plan=${encodeURIComponent(plan.id)}`}>
+                            <small>{plan.ram_gb} GB RAM</small>
+                            <strong>{plan.name}</strong>
+                            <p>{plan.description}</p>
+                            <b>{currency} {Number(plan.price).toLocaleString('id-ID')}</b>
+                            <em>Beli plan →</em>
+                        </Plan>
+                    ))}
+                </Plans>
+            </Store>
+            <LoginPanel id={'pahri-login'}>
+                <LoginInner>
+                    <h2>{title || 'Masuk ke Pahri'}</h2>
+                    <p>Login untuk membuka dashboard, mengurus server dan meneruskan pembelian panel.</p>
+                    <FlashMessageRender css={undefined} />
+                    <Form {...props} ref={ref}>{props.children}</Form>
+                    <Trust><span>QRIS Ready</span><span>Secure Login</span><span>Instant Setup</span></Trust>
+                </LoginInner>
+            </LoginPanel>
+        </Page>
+    );
+});
