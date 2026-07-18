@@ -66,7 +66,7 @@ const LoginContainer = ({ history }: RouteComponentProps) => {
             .then(response => {
                 if (response.complete) {
                     // @ts-expect-error this is valid
-                    window.location = response.intended || '/';
+                    window.location = response.intended && response.intended !== '/' ? response.intended : '/dashboard';
                     return;
                 }
                 history.replace('/auth/login/checkpoint', { token: response.confirmationToken });
@@ -90,14 +90,14 @@ const LoginContainer = ({ history }: RouteComponentProps) => {
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={'Welcome back'}>
+                <LoginFormContainer title={'Login Pahri'}>
                     <Field light type={'text'} label={'Username atau Email'} name={'username'} disabled={isSubmitting} />
                     <div css={tw`mt-6`}>
                         <Field light type={'password'} label={'Kata Laluan'} name={'password'} disabled={isSubmitting} />
                     </div>
                     <div css={tw`mt-7`}>
                         <Button type={'submit'} size={'xlarge'} isLoading={isSubmitting} disabled={isSubmitting}>
-                            Enter Control Center
+                            Masuk Dashboard
                         </Button>
                     </div>
                     {recaptchaEnabled && (
